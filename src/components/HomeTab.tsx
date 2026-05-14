@@ -36,7 +36,6 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
     if (!container) return;
     
     let touchDist = 0;
-    let initialScale = 1;
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 2) {
@@ -44,30 +43,43 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        initialScale = scale;
       }
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault(); // crucial to prevent browser scaling
+      if (e.touches.length === 2 && touchDist > 0) {
+        e.preventDefault(); // prevent browser scaling
+        e.stopPropagation(); // prevent framer motion panning
         const dist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         );
-        const delta = dist / touchDist;
-        setScale(Math.min(Math.max(initialScale * delta, 0.5), 3));
+        const delta = dist - touchDist;
+        if (Math.abs(delta) > 2) {
+          setScale(prev => Math.min(Math.max(prev + delta * 0.01, 0.5), 3.5));
+          touchDist = dist;
+        }
       }
     };
 
-    container.addEventListener('touchstart', onTouchStart, { passive: false });
-    container.addEventListener('touchmove', onTouchMove, { passive: false });
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        touchDist = 0;
+      }
+    };
+
+    container.addEventListener('touchstart', onTouchStart, { passive: false, capture: true });
+    container.addEventListener('touchmove', onTouchMove, { passive: false, capture: true });
+    container.addEventListener('touchend', onTouchEnd, { capture: true });
+    container.addEventListener('touchcancel', onTouchEnd, { capture: true });
 
     return () => {
-      container.removeEventListener('touchstart', onTouchStart);
-      container.removeEventListener('touchmove', onTouchMove);
+      container.removeEventListener('touchstart', onTouchStart, { capture: true });
+      container.removeEventListener('touchmove', onTouchMove, { capture: true });
+      container.removeEventListener('touchend', onTouchEnd, { capture: true });
+      container.removeEventListener('touchcancel', onTouchEnd, { capture: true });
     };
-  }, [scale]);
+  }, []);
 
   const handleWheel = (e: React.WheelEvent) => {
     if (e.deltaY < 0) {
@@ -122,12 +134,12 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
           style={{ 
             x, 
             y,
-            backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg")',
+            backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/0/03/BlankMap-World6.svg")',
             backgroundSize: 'contain',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             opacity: 1,
-            filter: 'contrast(1.5) brightness(2.5) drop-shadow(0 0 4px rgba(34,211,238,0.3))' // Bright continents with subtle cyan glow
+            filter: 'contrast(1.5) brightness(0.6) sepia(1) hue-rotate(180deg) saturate(4) drop-shadow(0 0 2px rgba(34,211,238,0.4))'
           }}
           animate={{ scale }}
           transition={{ scale: { type: 'spring', bounce: 0.1, duration: 0.4 } }}
