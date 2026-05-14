@@ -4,7 +4,7 @@ import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milesto
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
-export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, data: any) => void }) {
+export default function HomeTab({ onNavigate, completedChapters = [] }: { onNavigate?: (type: string, data: any) => void; completedChapters?: number[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [showStoryPanel, setShowStoryPanel] = useState(false);
@@ -386,53 +386,77 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
                 {/* Chapter 1 */}
                 <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)] shrink-0 z-10 font-bold text-xs relative">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(1) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]'} shrink-0 z-10 font-bold text-xs relative`}>
                     01
                   </div>
-                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-cyan-500/30 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
-                     <h3 className="text-cyan-400 font-bold mb-1">第一章：第一道光</h3>
+                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(1) ? 'border-[#2ecc71]/30' : 'border-cyan-500/30'} rounded-2xl p-4 shadow-lg backdrop-blur-sm`}>
+                     <h3 className={`${completedChapters.includes(1) ? 'text-[#2ecc71]' : 'text-cyan-400'} font-bold mb-1`}>第一章：第一道光</h3>
                      <p className="text-xs text-slate-400 mb-3 font-mono">记忆唤醒的起点</p>
                      <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
                        当你刚加入计划时，世界地图大部分是暗的。你需要选择第一座城市，沿着真实的城市路线出发，收集散落在地球上的光迹碎片。
                      </p>
-                     <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
-                        <CheckCircle2 size={12} className="mr-1" />
-                        进行中: 第一条光迹待唤醒
-                     </div>
+                     {completedChapters.includes(1) ? (
+                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
+                           <CheckCircle2 size={12} className="mr-1" />
+                           已完成: 第一条光迹已唤醒
+                        </div>
+                     ) : (
+                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
+                           <Activity size={12} className="mr-1" />
+                           进行中: 第一条光迹待唤醒
+                        </div>
+                     )}
                   </div>
                 </div>
 
                 {/* Chapter 2 */}
                 <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-slate-800 text-slate-400 shrink-0 z-10 font-bold text-xs">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(2) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : completedChapters.includes(1) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
                     02
                   </div>
-                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-white/5 rounded-2xl p-4 shadow-lg backdrop-blur-sm opacity-60">
+                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(2) ? 'border-[#2ecc71]/30' : completedChapters.includes(1) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(1) ? '' : 'opacity-60'}`}>
                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-slate-300 font-bold">第二章：沉睡的城市</h3>
-                        <Lock size={14} className="text-slate-500" />
+                        <h3 className={`${completedChapters.includes(2) ? 'text-[#2ecc71]' : completedChapters.includes(1) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第二章：沉睡的城市</h3>
+                        {!completedChapters.includes(1) && <Lock size={14} className="text-slate-500" />}
                      </div>
                      <p className="text-xs text-slate-500 mb-3 font-mono">单座城市的深度解密</p>
-                     <p className="text-[11px] text-slate-400 leading-relaxed">
+                     <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
                        进入巴黎等城市。城市并非完整开放，无数路段仍处于沉睡。每完成一条路线，你将唤醒一个区域（如塞纳河、埃菲尔、卢浮宫）。点亮全部区域，让整座城市重现星河。
                      </p>
+                     {completedChapters.includes(2) ? (
+                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
+                           <CheckCircle2 size={12} className="mr-1" />
+                           已完成: 城市已重现星河
+                        </div>
+                     ) : completedChapters.includes(1) ? (
+                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
+                           <Activity size={12} className="mr-1" />
+                           进行中: 探索沉睡的城市
+                        </div>
+                     ) : null}
                   </div>
                 </div>
 
                 {/* Chapter 3 */}
                 <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-slate-800 text-slate-400 shrink-0 z-10 font-bold text-xs">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(2) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
                     03
                   </div>
-                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-white/5 rounded-2xl p-4 shadow-lg backdrop-blur-sm opacity-60">
+                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(2) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(2) ? '' : 'opacity-60'}`}>
                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-slate-300 font-bold">第三章：世界光迹网络</h3>
-                        <Lock size={14} className="text-slate-500" />
+                        <h3 className={`${completedChapters.includes(2) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第三章：世界光迹网络</h3>
+                        {!completedChapters.includes(2) && <Lock size={14} className="text-slate-500" />}
                      </div>
                      <p className="text-xs text-slate-500 mb-3 font-mono">从点到面的文明复苏</p>
-                     <p className="text-[11px] text-slate-400 leading-relaxed">
+                     <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
                        当你点亮多座城市后，系列任务将随之开启。唤醒“巴黎+伦敦+罗马”，解锁欧洲文明光带；点亮“东京+京都+首尔”，重构东亚城市光带。连点成线，复织世界的光迹网络。
                      </p>
+                     {completedChapters.includes(2) && (
+                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
+                           <Activity size={12} className="mr-1" />
+                           进行中: 复织世界网络
+                        </div>
+                     )}
                   </div>
                 </div>
 

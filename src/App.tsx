@@ -14,6 +14,7 @@ import LeaderboardView from './components/LeaderboardView';
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [fullScreenPage, setFullScreenPage] = useState<{type: 'cityRoutes' | 'routeDetail' | 'runPlayback' | 'litRecords' | 'leaderboard', data?: any} | null>(null);
+  const [completedChapters, setCompletedChapters] = useState<number[]>([]);
 
   const tabs = [
     { id: 'home', label: '首页', icon: Compass },
@@ -25,7 +26,7 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab onNavigate={(type, data) => setFullScreenPage({ type, data })} />;
+        return <HomeTab onNavigate={(type, data) => setFullScreenPage({ type, data })} completedChapters={completedChapters} />;
       case 'events':
         return <EventsTab />;
       case 'cities':
@@ -121,6 +122,15 @@ export default function App() {
                      previousCityData.status = 'lit';
                      previousCityData.justLit = true;
                    }
+
+                   setCompletedChapters(prev => {
+                     const newChapters = [...prev];
+                     if (!newChapters.includes(1)) newChapters.push(1);
+                     if (previousCityData.status === 'lit' && !newChapters.includes(2)) {
+                       newChapters.push(2);
+                     }
+                     return newChapters;
+                   });
 
                    // Navigate back to cityRoutes with the updated data
                    setFullScreenPage({ type: 'cityRoutes', data: { ...previousCityData } });

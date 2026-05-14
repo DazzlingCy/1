@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Pause, Play, Square, MapPin, ChevronLeft, Zap } from 'lucide-react';
 
@@ -15,6 +15,22 @@ export default function RunPlaybackView({ cityId, routeIndex, image, onExit, onC
   const [distance, setDistance] = useState(0);
   const [time, setTime] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ w: 0, h: 0 });
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        setDimensions({ w: entry.contentRect.width, h: entry.contentRect.height });
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const isPortrait = dimensions.h > dimensions.w && dimensions.w > 0;
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -47,17 +63,25 @@ export default function RunPlaybackView({ cityId, routeIndex, image, onExit, onC
   };
 
   return (
-    <div className="w-full h-full bg-black relative overflow-hidden font-sans text-white">
-      {/* Background simulating video */}
-      <motion.div 
-        className="absolute inset-0 z-0 origin-center"
-        animate={{
-          scale: isPlaying ? [1, 1.1, 1] : 1,
-          transition: { duration: 20, repeat: Infinity, ease: 'linear' }
-        }}
+    <div ref={containerRef} className="w-full h-full bg-black flex items-center justify-center overflow-hidden">
+      <div 
+        className="relative bg-black font-sans text-white origin-center overflow-hidden"
+        style={dimensions.w > 0 ? {
+          width: isPortrait ? `${dimensions.h}px` : '100%',
+          height: isPortrait ? `${dimensions.w}px` : '100%',
+          transform: isPortrait ? 'rotate(90deg)' : 'none',
+        } : {}}
       >
-        <img src={image} alt="Route scenery" className="w-full h-full object-cover opacity-80" />
-      </motion.div>
+        {/* Background simulating video */}
+        <motion.div 
+          className="absolute inset-0 z-0 origin-center"
+          animate={{
+            scale: isPlaying ? [1, 1.1, 1] : 1,
+            transition: { duration: 20, repeat: Infinity, ease: 'linear' }
+          }}
+        >
+          <img src={image} alt="Route scenery" className="w-full h-full object-cover opacity-80" />
+        </motion.div>
 
       {/* Top Bar */}
       <div className="absolute top-0 left-0 right-0 pt-safet px-4 py-6 z-10 flex items-center justify-between bg-gradient-to-b from-black/60 to-transparent">
@@ -178,6 +202,7 @@ export default function RunPlaybackView({ cityId, routeIndex, image, onExit, onC
            </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </div>
   );
 }
