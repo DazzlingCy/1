@@ -20,7 +20,7 @@ export default function ProfileTab() {
   ];
 
   return (
-    <div className="w-full h-full bg-[#05070A] overflow-y-auto pb-24 text-slate-100 font-sans">
+    <div className="w-full h-full bg-[#05070A] overflow-y-auto pb-24 text-slate-100 font-sans hide-scrollbar">
       {/* Header Profile Info */}
       <div className="relative pt-12 pb-16 px-6 bg-gradient-to-b from-cyan-900/20 via-cyan-900/5 to-transparent">
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-cyan-500/10 to-transparent pointer-events-none blur-3xl" />

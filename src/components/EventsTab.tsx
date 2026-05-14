@@ -3,7 +3,7 @@ import { Gift, Globe2, ChevronRight, Sparkles } from 'lucide-react';
 
 export default function EventsTab() {
   return (
-    <div className="w-full h-full bg-[#05070A] overflow-y-auto pb-24 text-slate-100 font-sans">
+    <div className="w-full h-full bg-[#05070A] overflow-y-auto pb-24 text-slate-100 font-sans hide-scrollbar">
       <div className="sticky top-0 z-20 bg-black/40 backdrop-blur-md pt-safeb flex items-center justify-center p-5 border-b border-white/10">
         <h1 className="text-sm font-bold tracking-widest uppercase text-cyan-400">热门活动</h1>
       </div>
