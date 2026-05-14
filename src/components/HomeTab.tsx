@@ -1,13 +1,18 @@
 import { useState, useRef } from 'react';
-import { motion, useMotionValue, useTransform, AnimatePresence } from 'motion/react';
-import { Award, Zap, ChevronRight, Plus, Minus, X, CheckCircle2, Lock } from 'lucide-react';
-import { CITIES } from '../data/cities';
+import { motion, useMotionValue, animate, AnimatePresence } from 'motion/react';
+import { Award, Zap, ChevronRight, Plus, Minus, X, CheckCircle2, Lock, MapPin, Route, Milestone } from 'lucide-react';
+import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
 export default function HomeTab() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [showStoryPanel, setShowStoryPanel] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  const [showCityRoutes, setShowCityRoutes] = useState<CityData | null>(null);
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.5, 0.5));
@@ -19,6 +24,99 @@ export default function HomeTab() {
       setScale(prev => Math.max(prev - 0.1, 0.5));
     }
   };
+
+  const handleStartExplore = () => {
+    setShowStoryPanel(false);
+    const inProgressCity = CITIES.find(c => c.status === 'in-progress') || CITIES[0];
+    
+    // Default map is 1200x800
+    const mapWidth = 1200;
+    const mapHeight = 800;
+    
+    // Find offset
+    const offsetX = (0.5 - inProgressCity.x / 100) * mapWidth;
+    const offsetY = (0.5 - inProgressCity.y / 100) * mapHeight;
+    
+    animate(x, offsetX, { type: 'spring', bounce: 0, duration: 0.8 });
+    animate(y, offsetY, { type: 'spring', bounce: 0, duration: 0.8 });
+    setScale(1.8);
+    
+    setTimeout(() => {
+      setSelectedCity(inProgressCity);
+    }, 800);
+  };
+
+  const handleCityClick = (city: CityData) => {
+    setSelectedCity(city);
+  };
+
+  if (showCityRoutes) {
+    return (
+      <div className="w-full h-full bg-[#05070A] overflow-y-auto pb-24 text-slate-100 font-sans hide-scrollbar">
+        <div className="sticky top-0 z-20 bg-black/40 backdrop-blur-md pt-safeb flex items-center px-4 py-4 border-b border-white/10">
+          <button 
+            onClick={() => setShowCityRoutes(null)} 
+            className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full hover:bg-white/10 transition-colors"
+          >
+            <ChevronRight className="rotate-180" size={20} />
+          </button>
+          <h1 className="flex-1 text-center font-bold tracking-widest text-slate-100 pr-8">{showCityRoutes.name}光迹探索</h1>
+        </div>
+        
+        <div className="relative w-full h-64 overflow-hidden">
+          <img src={showCityRoutes.image} alt={showCityRoutes.name} className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#05070A] via-[#05070A]/50 to-transparent" />
+          <div className="absolute bottom-6 left-6 right-6">
+            <h2 className="text-3xl font-bold text-white tracking-widest mb-2 shadow-sm">{showCityRoutes.name}</h2>
+            <div className="flex gap-4 text-sm font-medium">
+              <span className="flex items-center text-slate-300"><Route size={16} className="mr-1.5 opacity-70"/> {showCityRoutes.routes} 路线</span>
+              <span className="flex items-center text-slate-300"><MapPin size={16} className="mr-1.5 opacity-70"/> {showCityRoutes.spots} 景点</span>
+            </div>
+            <div className="mt-4">
+               <div className="flex justify-between items-end mb-1">
+                 <span className="text-[10px] text-slate-400">唤醒进度</span>
+                 <span className="text-[10px] text-amber-500 font-mono font-medium">{showCityRoutes.completed}/{showCityRoutes.routes}</span>
+               </div>
+               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+                 <div 
+                   className="h-full bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" 
+                   style={{ width: `${(showCityRoutes.completed / showCityRoutes.routes) * 100}%` }} 
+                 />
+               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-6">
+          <div className="text-sm font-semibold text-cyan-400 uppercase tracking-widest mb-4 flex items-center">
+            <Zap size={16} className="mr-2" /> 待唤醒路线
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 cursor-pointer hover:bg-white/10 transition-colors shadow-lg">
+                <div className="w-20 h-20 bg-slate-800 rounded-xl overflow-hidden shrink-0 relative">
+                  <img src={showCityRoutes.image} alt="Route" className="absolute inset-0 w-full h-full object-cover opacity-60" />
+                  <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-sm text-[8px] px-1.5 py-0.5 rounded text-slate-300">
+                    路线 {i + 1}
+                  </div>
+                </div>
+                <div className="flex-1 overflow-hidden py-1">
+                   <h3 className="text-sm font-bold text-slate-100 mb-1 truncate">{showCityRoutes.name}精粹路线 0{i + 1}</h3>
+                   <div className="flex items-center gap-3 text-[10px] text-slate-500 mb-3">
+                     <span className="flex items-center"><Milestone size={12} className="mr-1"/> 5.2 km</span>
+                     <span className="flex items-center"><MapPin size={12} className="mr-1"/> 8 景点</span>
+                   </div>
+                   <button className="text-xs bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-400 py-1.5 px-3 rounded-lg border border-cyan-500/20 transition-colors w-full tracking-wide">
+                     开启探索
+                   </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full bg-[#05070A] overflow-hidden flex items-center justify-center">
@@ -37,10 +135,9 @@ export default function HomeTab() {
           drag
           dragConstraints={containerRef}
           dragElastic={0.2}
-          animate={{ scale }}
-          transition={{ type: 'spring', bounce: 0.1, duration: 0.4 }}
-          className="absolute top-1/2 left-1/2 w-[1200px] h-[800px] -translate-x-1/2 -translate-y-1/2 origin-center"
           style={{ 
+            x, 
+            y,
             backgroundImage: 'url("https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg")',
             backgroundSize: 'contain',
             backgroundPosition: 'center',
@@ -48,26 +145,48 @@ export default function HomeTab() {
             opacity: 0.85,
             filter: 'contrast(1.2)'
           }}
+          animate={{ scale }}
+          transition={{ scale: { type: 'spring', bounce: 0.1, duration: 0.4 } }}
+          className="absolute top-1/2 left-1/2 w-[1200px] h-[800px] -translate-x-1/2 -translate-y-1/2 origin-center"
         >
           {/* Cities Nodes */}
-          {CITIES.map((city) => (
-            <motion.div
-              key={city.id}
-              className="absolute group flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2"
-              style={{
-                left: `${city.x}%`,
-                top: `${city.y}%`,
-              }}
-              whileHover={{ scale: 1.2, zIndex: 50 }}
-              whileTap={{ scale: 0.9 }}
-            >
-              <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_10px_cyan] cursor-pointer ring-4 ring-cyan-400/20 relative flex items-center justify-center">
-                <div className="absolute top-5 bg-black/60 border border-white/10 px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap text-cyan-50 shadow-sm pointer-events-none">
-                  {city.name}
+          {CITIES.map((city) => {
+            const statusConfig = {
+              'unlit': {
+                dot: 'bg-slate-700/60 ring-slate-800/30 shadow-none',
+                text: 'text-slate-500/80 bg-black/40',
+              },
+              'in-progress': {
+                dot: 'bg-amber-400 ring-amber-400/30 shadow-[0_0_15px_rgba(251,191,36,0.8)]',
+                text: 'text-amber-100 bg-amber-950/80 border border-amber-500/30',
+              },
+              'lit': {
+                dot: 'bg-cyan-400 ring-cyan-400/30 shadow-[0_0_15px_cyan]',
+                text: 'text-cyan-50 bg-black/60 border border-cyan-500/30',
+              }
+            };
+            const config = statusConfig[city.status];
+
+            return (
+              <motion.div
+                key={city.id}
+                className="absolute group flex flex-col items-center justify-center -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  left: `${city.x}%`,
+                  top: `${city.y}%`,
+                }}
+                whileHover={{ scale: 1.2, zIndex: 50 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => handleCityClick(city)}
+              >
+                <div className={cn("w-3 h-3 rounded-full cursor-pointer ring-4 relative flex items-center justify-center", config.dot)}>
+                  <div className={cn("absolute top-5 px-2 py-1 rounded-md text-[10px] font-medium whitespace-nowrap shadow-sm pointer-events-none transition-all duration-300", config.text)}>
+                    {city.name}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
 
@@ -148,6 +267,85 @@ export default function HomeTab() {
         </div>
       </div>
 
+      {/* City Popup Card Overlay */}
+      <AnimatePresence>
+        {selectedCity && !showStoryPanel && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-40 bg-black/40 flex items-center justify-center p-6 backdrop-blur-[2px]"
+            onClick={() => setSelectedCity(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="w-full max-w-sm bg-slate-900/90 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+              onClick={(e) => {
+                 e.stopPropagation();
+                 setSelectedCity(null);
+                 setShowCityRoutes(selectedCity);
+              }}
+            >
+              <div className="relative h-48 w-full">
+                <img src={selectedCity.image} alt={selectedCity.name} className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCity(null);
+                  }}
+                  className="absolute top-4 right-4 w-8 h-8 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center backdrop-blur-sm transition-colors text-white"
+                >
+                  <X size={16} />
+                </button>
+                <div className="absolute bottom-4 left-6">
+                   <h3 className="text-3xl font-bold text-white tracking-widest drop-shadow-md">{selectedCity.name}</h3>
+                   <p className="text-sm font-medium text-cyan-300 uppercase tracking-widest mt-1 opacity-80">{selectedCity.englishName}</p>
+                </div>
+              </div>
+              
+              <div className="p-6 pt-2">
+                 <div className="flex justify-between text-sm mb-6 bg-white/5 rounded-xl p-4 border border-white/5">
+                   <div className="flex flex-col items-center">
+                     <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.routes}</span>
+                     <span className="text-[10px] text-slate-500 uppercase tracking-widest">路线</span>
+                   </div>
+                   <div className="w-px bg-white/10" />
+                   <div className="flex flex-col items-center">
+                     <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.spots}</span>
+                     <span className="text-[10px] text-slate-500 uppercase tracking-widest">景点</span>
+                   </div>
+                   <div className="w-px bg-white/10" />
+                   <div className="flex flex-col items-center">
+                     <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.status === 'lit' ? '100%' : `${Math.round((selectedCity.completed / selectedCity.routes) * 100)}%`}</span>
+                     <span className="text-[10px] text-slate-500 uppercase tracking-widest">完成度</span>
+                   </div>
+                 </div>
+
+                 <div className="mb-6">
+                    <div className="flex justify-between items-end mb-2">
+                       <span className="text-[10px] text-slate-400">唤醒进度</span>
+                       <span className="text-xs font-mono font-medium text-amber-500">{selectedCity.completed} / {selectedCity.routes}</span>
+                    </div>
+                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                       <div 
+                         className="h-full bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
+                         style={{ width: `${(selectedCity.completed / selectedCity.routes) * 100}%` }} 
+                       />
+                    </div>
+                 </div>
+
+                 <button className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                   进入这座城市
+                 </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Story Panel Overlay */}
       <AnimatePresence>
         {showStoryPanel && (
@@ -172,9 +370,18 @@ export default function HomeTab() {
             </div>
             
             <div className="flex-1 overflow-y-auto px-6 py-6 pb-24 hide-scrollbar">
-              <p className="text-sm text-slate-300 leading-relaxed mb-6 font-medium">
-                通过复原600年前地球上真实存在的城市路线，让用户以运动的方式重新进入这些场景，唤醒沉睡的城市记忆，让人类重新记起母星。
-              </p>
+              <div className="mb-8 p-4 bg-gradient-to-r from-cyan-950/40 to-transparent rounded-xl border-l-2 border-cyan-500 shadow-md">
+                <p className="text-xs text-slate-300 leading-relaxed font-medium italic mb-3">
+                  "600年以后，人类早已离开地球，生活在群星之间。我们建造了新的城市、新的轨道、新的家园。"
+                </p>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium italic mb-3">
+                  "可是走向宇宙深处，人们越开始想念那颗蓝色的母星。想念巴黎清晨的雾，想念东京街口的人潮，想念开罗金字塔前吹来的热风，也想念南京城墙下，梧桐叶落在路面的声音..."
+                </p>
+                <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  你，不是普通运动者。你是一名<span className="text-cyan-400 font-bold mx-1">光迹探索者 (Glowtrail Explorer)</span>。<br/>
+                  你的任务，是通过每一次出发，唤醒一段地球记忆；每完成一条路线，点亮一道母星光迹。
+                </p>
+              </div>
 
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
                 {/* Chapter 1 */}
@@ -184,13 +391,13 @@ export default function HomeTab() {
                   </div>
                   <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-cyan-500/30 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
                      <h3 className="text-cyan-400 font-bold mb-1">第一章：第一道光</h3>
-                     <p className="text-xs text-slate-400 mb-3">熟悉内容基础阶段</p>
+                     <p className="text-xs text-slate-400 mb-3 font-mono">记忆唤醒的起点</p>
                      <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
-                       用户刚加入计划，世界地图大部分是暗的。<br/>系统告诉用户：你需要选择第一座城市，完成一条路线。完成后，地球上亮起第一条光迹。
+                       当你刚加入计划时，世界地图大部分是暗的。你需要选择第一座城市，沿着真实的城市路线出发，收集散落在地球上的光迹碎片。
                      </p>
                      <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
                         <CheckCircle2 size={12} className="mr-1" />
-                        进行中: 选择你的第一座城市
+                        进行中: 第一条光迹待唤醒
                      </div>
                   </div>
                 </div>
@@ -205,9 +412,9 @@ export default function HomeTab() {
                         <h3 className="text-slate-300 font-bold">第二章：沉睡的城市</h3>
                         <Lock size={14} className="text-slate-500" />
                      </div>
-                     <p className="text-xs text-slate-500 mb-3">单城市任务</p>
+                     <p className="text-xs text-slate-500 mb-3 font-mono">单座城市的深度解密</p>
                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                       用户进入一座城市，比如巴黎。巴黎不是完整开放，而是有段城市记忆处于沉睡状态。每完成一条路线，就唤醒一个区域（塞纳河光迹等）。
+                       进入巴黎等城市。城市并非完整开放，无数路段仍处于沉睡。每完成一条路线，你将唤醒一个区域（如塞纳河、埃菲尔、卢浮宫）。点亮全部区域，让整座城市重现星河。
                      </p>
                   </div>
                 </div>
@@ -222,9 +429,9 @@ export default function HomeTab() {
                         <h3 className="text-slate-300 font-bold">第三章：世界光迹网络</h3>
                         <Lock size={14} className="text-slate-500" />
                      </div>
-                     <p className="text-xs text-slate-500 mb-3">多城市任务开启</p>
+                     <p className="text-xs text-slate-500 mb-3 font-mono">从点到面的文明复苏</p>
                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                       当用户点亮多座城市后，开启系列城市任务。比如：点亮巴黎+伦敦+罗马，解锁：欧洲文明光带。
+                       当你点亮多座城市后，系列任务将随之开启。唤醒“巴黎+伦敦+罗马”，解锁欧洲文明光带；点亮“东京+京都+首尔”，重构东亚城市光带。连点成线，复织世界的光迹网络。
                      </p>
                   </div>
                 </div>
@@ -239,8 +446,9 @@ export default function HomeTab() {
                         <h3 className="text-slate-300 font-bold">第四章：第100座城市</h3>
                         <Lock size={14} className="text-slate-500" />
                      </div>
-                     <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
-                       当用户持续点亮城市后，需要通过完成更多城市，收集获得最终勋章。长期悬念给予持续吸引力。
+                     <p className="text-xs text-slate-500 mb-3 font-mono">终极的母星记忆</p>
+                     <p className="text-[11px] text-slate-400 leading-relaxed">
+                       持之以恒地探索，直到触及第100座城市的边缘。收集散落的最终碎片，获得至高无上的回归勋章。长路的尽头，是地球最完整的倒影。
                      </p>
                   </div>
                 </div>
@@ -250,7 +458,7 @@ export default function HomeTab() {
             
             <div className="p-4 bg-black/80 backdrop-blur-md border-t border-white/5 shrink-0">
                <button 
-                 onClick={() => setShowStoryPanel(false)}
+                 onClick={handleStartExplore}
                  className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.3)]"
                >
                  开始探索
