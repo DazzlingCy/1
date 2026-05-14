@@ -11,6 +11,14 @@ export default function HomeTab() {
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.5, 0.5));
 
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.deltaY < 0) {
+      setScale(prev => Math.min(prev + 0.1, 3));
+    } else {
+      setScale(prev => Math.max(prev - 0.1, 0.5));
+    }
+  };
+
   return (
     <div className="relative w-full h-full bg-[#05070A] overflow-hidden flex items-center justify-center">
       {/* Decorative Radial Glow */}
@@ -20,8 +28,9 @@ export default function HomeTab() {
 
       {/* Pannable/Zoomable Map Area */}
       <div 
-        className="w-full h-full relative cursor-grab active:cursor-grabbing z-10"
+        className="w-full h-full relative cursor-grab active:cursor-grabbing z-10 touch-none"
         ref={containerRef}
+        onWheel={handleWheel}
       >
         <motion.div
           drag
@@ -62,7 +71,7 @@ export default function HomeTab() {
               whileTap={{ scale: 0.9 }}
             >
               <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_10px_cyan] cursor-pointer ring-4 ring-cyan-400/20 relative flex items-center justify-center">
-                <div className="absolute top-5 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 border border-white/20 px-2 py-1 rounded text-[10px] whitespace-nowrap shadow-lg text-slate-100">
+                <div className="absolute top-5 bg-black/60 border border-white/10 px-1.5 py-0.5 rounded text-[10px] whitespace-nowrap text-cyan-50 shadow-sm pointer-events-none">
                   {city.name}
                 </div>
               </div>
