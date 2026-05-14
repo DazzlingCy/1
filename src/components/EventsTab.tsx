@@ -17,7 +17,7 @@ export default function EventsTab() {
           className="relative w-full h-[240px] rounded-2xl overflow-hidden shadow-2xl cursor-pointer group border border-amber-500/30"
         >
           <img 
-            src="https://images.unsplash.com/photo-1614030424754-24d0eac36a15?auto=format&fit=crop&q=80&w=600&h=400" 
+            src="https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&q=80&w=600&h=400" 
             alt="勋章抽奖" 
             className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 opacity-60" 
           />
@@ -52,7 +52,7 @@ export default function EventsTab() {
           className="relative w-full h-[280px] rounded-2xl overflow-hidden shadow-2xl cursor-pointer group border border-purple-500/30"
         >
           <img 
-            src="https://images.unsplash.com/photo-1552508744-1696d4464960?auto=format&fit=crop&q=80&w=600&h=500" 
+            src="https://images.unsplash.com/photo-1506501139174-099022df5260?auto=format&fit=crop&q=80&w=600&h=500" 
             alt="百人百城计划" 
             className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 opacity-60" 
           />
