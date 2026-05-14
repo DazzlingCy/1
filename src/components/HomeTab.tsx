@@ -44,20 +44,10 @@ export default function HomeTab() {
             backgroundSize: 'contain',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.6
+            opacity: 0.85,
+            filter: 'contrast(1.2)'
           }}
         >
-          {/* Mission Path SVG */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40 drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]">
-             <path 
-               d={`M ${CITIES.map(c => `${(c.x / 100) * 1200},${(c.y / 100) * 800}`).join(' L ')}`} 
-               fill="none" 
-               stroke="#22d3ee" 
-               strokeWidth="2" 
-               strokeDasharray="4 6" 
-             />
-          </svg>
-
           {/* Cities Nodes */}
           {CITIES.map((city) => (
             <motion.div
