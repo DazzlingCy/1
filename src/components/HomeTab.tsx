@@ -21,13 +21,41 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
     const offsetX = (0.5 - inProgressCity.x / 100) * mapWidth;
     const offsetY = (0.5 - inProgressCity.y / 100) * mapHeight;
     
-    animate(x, offsetX, { type: 'spring', bounce: 0, duration: 1.2 });
-    animate(y, offsetY, { type: 'spring', bounce: 0, duration: 1.2 });
+    x.set(offsetX);
+    y.set(offsetY);
     setScale(1.8);
   }, [x, y]);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.5, 0.5));
+
+  const touchDistance = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchDistance.current = dist;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchDistance.current !== null) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const delta = dist - touchDistance.current;
+      setScale(prev => Math.min(Math.max(prev + delta * 0.01, 0.5), 3));
+      touchDistance.current = dist;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    touchDistance.current = null;
+  };
 
   const handleWheel = (e: React.WheelEvent) => {
     if (e.deltaY < 0) {
@@ -74,6 +102,10 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
         className="w-full h-full relative cursor-grab active:cursor-grabbing z-10 touch-none"
         ref={containerRef}
         onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
       >
         <motion.div
           drag

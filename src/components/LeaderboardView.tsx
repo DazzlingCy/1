@@ -6,14 +6,14 @@ interface LeaderboardViewProps {
 }
 
 const leaderboardData = [
-  { id: 1, name: 'Runner V', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100', score: 18450 },
-  { id: 2, name: 'Alex Explorer', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100&h=100', score: 16200 },
-  { id: 3, name: 'Sarah Chaser', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100', score: 14500 },
-  { id: 4, name: 'Light Speed', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100', score: 12100 },
-  { id: 5, name: 'Night Walker', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100&h=100', score: 11800 },
-  { id: 6, name: 'City Runner', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100', score: 9500 },
-  { id: 7, name: 'Earth Child', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100&h=100', score: 8200 },
-  { id: 8, name: 'Pacer X', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=100&h=100', score: 7100 },
+  { id: 1, name: '极光闪电', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100', score: 18450 },
+  { id: 2, name: '城市探险家', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100&h=100', score: 16200 },
+  { id: 3, name: '追光者·星', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100', score: 14500 },
+  { id: 4, name: '夜行猎手', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100', score: 12100 },
+  { id: 5, name: '风行无阻', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100&h=100', score: 11800 },
+  { id: 6, name: '地球狂奔', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100', score: 9500 },
+  { id: 7, name: '阿兹特克', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100&h=100', score: 8200 },
+  { id: 8, name: '超越极限', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=100&h=100', score: 7100 },
 ];
 
 export default function LeaderboardView({ onBack }: LeaderboardViewProps) {
@@ -108,8 +108,8 @@ export default function LeaderboardView({ onBack }: LeaderboardViewProps) {
       </div>
 
       {/* Current User */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-8">
-         <div className="flex items-center justify-between bg-cyan-950/40 border border-cyan-500/30 p-4 rounded-2xl backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.1)]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black via-black/90 to-transparent pb-safeb pt-12">
+         <div className="flex items-center justify-between bg-cyan-950/40 border border-cyan-500/30 p-4 rounded-2xl backdrop-blur-md shadow-[0_0_20px_rgba(34,211,238,0.1)] mb-4">
             <div className="flex items-center gap-4">
                <div className="w-6 text-center text-cyan-500 font-bold font-mono">142</div>
                <div className="w-10 h-10 rounded-full bg-slate-800 border hover:bg-white/10 flex items-center justify-center border-slate-700">
