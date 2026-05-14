@@ -13,49 +13,61 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
+  // Focus on the in-progress city on initial load
   useEffect(() => {
-    // Focus on the in-progress city on initial load
     const inProgressCity = CITIES.find(c => c.status === 'in-progress') || CITIES[0];
     const mapWidth = 1200;
     const mapHeight = 800;
     const offsetX = (0.5 - inProgressCity.x / 100) * mapWidth;
     const offsetY = (0.5 - inProgressCity.y / 100) * mapHeight;
     
+    // Set initially without animation
     x.set(offsetX);
     y.set(offsetY);
     setScale(1.8);
-  }, [x, y]);
+  }, []); // Run only once on mount
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.5, 0.5));
 
-  const touchDistance = useRef<number | null>(null);
+  // Native touch gestures for pinch to zoom
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    let touchDist = 0;
+    let initialScale = 1;
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 2) {
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      touchDistance.current = dist;
-    }
-  };
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        touchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialScale = scale;
+      }
+    };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length === 2 && touchDistance.current !== null) {
-      const dist = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-      const delta = dist - touchDistance.current;
-      setScale(prev => Math.min(Math.max(prev + delta * 0.01, 0.5), 3));
-      touchDistance.current = dist;
-    }
-  };
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault(); // crucial to prevent browser scaling
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const delta = dist / touchDist;
+        setScale(Math.min(Math.max(initialScale * delta, 0.5), 3));
+      }
+    };
 
-  const handleTouchEnd = () => {
-    touchDistance.current = null;
-  };
+    container.addEventListener('touchstart', onTouchStart, { passive: false });
+    container.addEventListener('touchmove', onTouchMove, { passive: false });
+
+    return () => {
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchmove', onTouchMove);
+    };
+  }, [scale]);
 
   const handleWheel = (e: React.WheelEvent) => {
     if (e.deltaY < 0) {
@@ -91,10 +103,10 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
   };
 
   return (
-    <div className="relative w-full h-full bg-[#05070A] overflow-hidden flex items-center justify-center">
+    <div className="relative w-full h-full bg-[#030B1C] overflow-hidden flex items-center justify-center">
       {/* Decorative Radial Glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-        <div className="w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px]"></div>
+        <div className="w-[600px] h-[600px] bg-cyan-700/20 rounded-full blur-[120px]"></div>
       </div>
 
       {/* Pannable/Zoomable Map Area */}
@@ -102,10 +114,6 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
         className="w-full h-full relative cursor-grab active:cursor-grabbing z-10 touch-none"
         ref={containerRef}
         onWheel={handleWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
       >
         <motion.div
           drag
@@ -119,7 +127,7 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
             opacity: 1,
-            filter: 'contrast(1.2) brightness(2)' // Make continents brighter
+            filter: 'contrast(1.5) brightness(2.5) drop-shadow(0 0 4px rgba(34,211,238,0.3))' // Bright continents with subtle cyan glow
           }}
           animate={{ scale }}
           transition={{ scale: { type: 'spring', bounce: 0.1, duration: 0.4 } }}
