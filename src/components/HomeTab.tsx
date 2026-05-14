@@ -23,7 +23,7 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
     
     x.set(offsetX);
     y.set(offsetY);
-    setScale(1.2);
+    setScale(1);
   }, [x, y]);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
@@ -79,7 +79,7 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
     
     animate(x, offsetX, { type: 'spring', bounce: 0, duration: 0.8 });
     animate(y, offsetY, { type: 'spring', bounce: 0, duration: 0.8 });
-    setScale(1.2);
+    setScale(1);
     
     setTimeout(() => {
       setSelectedCity(inProgressCity);
