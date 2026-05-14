@@ -1,18 +1,30 @@
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, animate, AnimatePresence } from 'motion/react';
 import { Award, Zap, ChevronRight, Plus, Minus, X, CheckCircle2, Lock, MapPin, Route, Milestone } from 'lucide-react';
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
-export default function HomeTab() {
+export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, data: any) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [showStoryPanel, setShowStoryPanel] = useState(false);
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
-  const [showCityRoutes, setShowCityRoutes] = useState<CityData | null>(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+
+  useEffect(() => {
+    // Focus on the in-progress city on initial load
+    const inProgressCity = CITIES.find(c => c.status === 'in-progress') || CITIES[0];
+    const mapWidth = 1200;
+    const mapHeight = 800;
+    const offsetX = (0.5 - inProgressCity.x / 100) * mapWidth;
+    const offsetY = (0.5 - inProgressCity.y / 100) * mapHeight;
+    
+    animate(x, offsetX, { type: 'spring', bounce: 0, duration: 1.2 });
+    animate(y, offsetY, { type: 'spring', bounce: 0, duration: 1.2 });
+    setScale(1.8);
+  }, [x, y]);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.5, 0.5));
@@ -50,74 +62,6 @@ export default function HomeTab() {
     setSelectedCity(city);
   };
 
-  if (showCityRoutes) {
-    return (
-      <div className="w-full h-full bg-[#05070A] overflow-y-auto pb-24 text-slate-100 font-sans hide-scrollbar">
-        <div className="sticky top-0 z-20 bg-black/40 backdrop-blur-md pt-safeb flex items-center px-4 py-4 border-b border-white/10">
-          <button 
-            onClick={() => setShowCityRoutes(null)} 
-            className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-full hover:bg-white/10 transition-colors"
-          >
-            <ChevronRight className="rotate-180" size={20} />
-          </button>
-          <h1 className="flex-1 text-center font-bold tracking-widest text-slate-100 pr-8">{showCityRoutes.name}光迹探索</h1>
-        </div>
-        
-        <div className="relative w-full h-64 overflow-hidden">
-          <img src={showCityRoutes.image} alt={showCityRoutes.name} className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#05070A] via-[#05070A]/50 to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6">
-            <h2 className="text-3xl font-bold text-white tracking-widest mb-2 shadow-sm">{showCityRoutes.name}</h2>
-            <div className="flex gap-4 text-sm font-medium">
-              <span className="flex items-center text-slate-300"><Route size={16} className="mr-1.5 opacity-70"/> {showCityRoutes.routes} 路线</span>
-              <span className="flex items-center text-slate-300"><MapPin size={16} className="mr-1.5 opacity-70"/> {showCityRoutes.spots} 景点</span>
-            </div>
-            <div className="mt-4">
-               <div className="flex justify-between items-end mb-1">
-                 <span className="text-[10px] text-slate-400">唤醒进度</span>
-                 <span className="text-[10px] text-amber-500 font-mono font-medium">{showCityRoutes.completed}/{showCityRoutes.routes}</span>
-               </div>
-               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
-                 <div 
-                   className="h-full bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" 
-                   style={{ width: `${(showCityRoutes.completed / showCityRoutes.routes) * 100}%` }} 
-                 />
-               </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-6">
-          <div className="text-sm font-semibold text-cyan-400 uppercase tracking-widest mb-4 flex items-center">
-            <Zap size={16} className="mr-2" /> 待唤醒路线
-          </div>
-          <div className="space-y-4">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 cursor-pointer hover:bg-white/10 transition-colors shadow-lg">
-                <div className="w-20 h-20 bg-slate-800 rounded-xl overflow-hidden shrink-0 relative">
-                  <img src={showCityRoutes.image} alt="Route" className="absolute inset-0 w-full h-full object-cover opacity-60" />
-                  <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-sm text-[8px] px-1.5 py-0.5 rounded text-slate-300">
-                    路线 {i + 1}
-                  </div>
-                </div>
-                <div className="flex-1 overflow-hidden py-1">
-                   <h3 className="text-sm font-bold text-slate-100 mb-1 truncate">{showCityRoutes.name}精粹路线 0{i + 1}</h3>
-                   <div className="flex items-center gap-3 text-[10px] text-slate-500 mb-3">
-                     <span className="flex items-center"><Milestone size={12} className="mr-1"/> 5.2 km</span>
-                     <span className="flex items-center"><MapPin size={12} className="mr-1"/> 8 景点</span>
-                   </div>
-                   <button className="text-xs bg-cyan-950/50 hover:bg-cyan-900/60 text-cyan-400 py-1.5 px-3 rounded-lg border border-cyan-500/20 transition-colors w-full tracking-wide">
-                     开启探索
-                   </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full h-full bg-[#05070A] overflow-hidden flex items-center justify-center">
       {/* Decorative Radial Glow */}
@@ -142,8 +86,8 @@ export default function HomeTab() {
             backgroundSize: 'contain',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
-            opacity: 0.85,
-            filter: 'contrast(1.2)'
+            opacity: 1,
+            filter: 'contrast(1.2) brightness(2)' // Make continents brighter
           }}
           animate={{ scale }}
           transition={{ scale: { type: 'spring', bounce: 0.1, duration: 0.4 } }}
@@ -285,7 +229,9 @@ export default function HomeTab() {
               onClick={(e) => {
                  e.stopPropagation();
                  setSelectedCity(null);
-                 setShowCityRoutes(selectedCity);
+                 if (onNavigate) {
+                   onNavigate('cityRoutes', selectedCity);
+                 }
               }}
             >
               <div className="relative h-48 w-full">
@@ -337,7 +283,16 @@ export default function HomeTab() {
                     </div>
                  </div>
 
-                 <button className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                 <button 
+                   className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                   onClick={(e) => {
+                     e.stopPropagation();
+                     setSelectedCity(null);
+                     if (onNavigate) {
+                       onNavigate('cityRoutes', selectedCity);
+                     }
+                   }}
+                 >
                    进入这座城市
                  </button>
               </div>

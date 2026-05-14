@@ -12,10 +12,12 @@ export interface CityData {
   spots: number;
   completed: number;
   status: CityStatus;
+  completedRouteIndices?: number[];
+  justLit?: boolean;
 }
 
 export const CITIES: CityData[] = [
-  { id: '1', name: '杭州', englishName: 'Hangzhou', continent: '中国', x: 83.39, y: 33.22, image: 'https://images.unsplash.com/photo-1555899434-94d1368aa7af?auto=format&fit=crop&q=80&w=400&h=300', routes: 14, spots: 92, completed: 5, status: 'in-progress' },
+  { id: '1', name: '杭州', englishName: 'Hangzhou', continent: '中国', x: 83.39, y: 33.22, image: 'https://images.unsplash.com/photo-1555899434-94d1368aa7af?auto=format&fit=crop&q=80&w=400&h=300', routes: 3, spots: 24, completed: 2, status: 'in-progress', completedRouteIndices: [1, 2] },
   { id: '2', name: '北京', englishName: 'Beijing', continent: '中国', x: 82.33, y: 27.83, image: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?auto=format&fit=crop&q=80&w=400&h=300', routes: 26, spots: 252, completed: 26, status: 'lit' },
   { id: '3', name: '上海', englishName: 'Shanghai', continent: '中国', x: 83.75, y: 32.66, image: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=400&h=300', routes: 14, spots: 83, completed: 0, status: 'unlit' },
   { id: '4', name: '南京', englishName: 'Nanjing', continent: '中国', x: 83.00, y: 32.22, image: 'https://images.unsplash.com/photo-1582650073289-53b52a1fe182?auto=format&fit=crop&q=80&w=400&h=300', routes: 12, spots: 71, completed: 0, status: 'unlit' },

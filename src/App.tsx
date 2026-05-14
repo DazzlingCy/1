@@ -5,9 +5,13 @@ import HomeTab from './components/HomeTab';
 import EventsTab from './components/EventsTab';
 import CitiesTab from './components/CitiesTab';
 import ProfileTab from './components/ProfileTab';
+import CityRoutesView from './components/CityRoutesView';
+import RouteDetailView from './components/RouteDetailView';
+import RunPlaybackView from './components/RunPlaybackView';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
+  const [fullScreenPage, setFullScreenPage] = useState<{type: 'cityRoutes' | 'routeDetail' | 'runPlayback', data: any} | null>(null);
 
   const tabs = [
     { id: 'home', label: '首页', icon: Compass },
@@ -19,7 +23,7 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab />;
+        return <HomeTab onNavigate={(type, data) => setFullScreenPage({ type, data })} />;
       case 'events':
         return <EventsTab />;
       case 'cities':
@@ -71,6 +75,59 @@ export default function App() {
           })}
         </div>
       </nav>
+
+      {/* Full Screen Pages overlays on top of everything including bottom nav */}
+      <AnimatePresence>
+        {fullScreenPage && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="absolute inset-0 z-[100] bg-[#05070A]"
+          >
+            {fullScreenPage.type === 'cityRoutes' && (
+               <CityRoutesView 
+                 city={fullScreenPage.data} 
+                 onBack={() => setFullScreenPage(null)} 
+                 onRouteClick={(routeIndex) => setFullScreenPage({ 
+                   type: 'routeDetail', 
+                   data: { cityId: fullScreenPage.data.id, routeIndex, image: fullScreenPage.data.image, previousCityData: fullScreenPage.data } 
+                 })} 
+               />
+            )}
+            {fullScreenPage.type === 'routeDetail' && (
+               <RouteDetailView 
+                 {...fullScreenPage.data}
+                 onBack={() => setFullScreenPage({ type: 'cityRoutes', data: fullScreenPage.data.previousCityData })}
+                 onStart={() => setFullScreenPage({ type: 'runPlayback', data: fullScreenPage.data })}
+               />
+            )}
+            {fullScreenPage.type === 'runPlayback' && (
+               <RunPlaybackView 
+                 {...fullScreenPage.data}
+                 onExit={() => setFullScreenPage({ type: 'routeDetail', data: fullScreenPage.data })}
+                 onComplete={() => {
+                   const { previousCityData, routeIndex } = fullScreenPage.data;
+                   const currentCompleted = previousCityData.completedRouteIndices || [];
+                   
+                   if (!currentCompleted.includes(routeIndex)) {
+                     previousCityData.completedRouteIndices = [...currentCompleted, routeIndex];
+                     previousCityData.completed = Math.min(previousCityData.completed + 1, previousCityData.routes);
+                   }
+                   
+                   if (previousCityData.completed === previousCityData.routes && previousCityData.status !== 'lit') {
+                     previousCityData.status = 'lit';
+                     previousCityData.justLit = true;
+                   }
+
+                   // Navigate back to cityRoutes with the updated data
+                   setFullScreenPage({ type: 'cityRoutes', data: { ...previousCityData } });
+                 }}
+               />
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
