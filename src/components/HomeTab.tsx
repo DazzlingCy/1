@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, animate, AnimatePresence } from 'motion/react';
-import { Award, Zap, ChevronRight, Plus, Minus, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity } from 'lucide-react';
+import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity } from 'lucide-react';
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
@@ -91,7 +91,7 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
   };
 
   return (
-    <div className="relative w-full h-full bg-[#05070A] overflow-hidden flex items-center justify-center">
+    <div className="relative w-full h-full bg-[#133643] overflow-hidden flex items-center justify-center">
       {/* Decorative Radial Glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
         <div className="w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-[120px]"></div>
@@ -203,21 +203,7 @@ export default function HomeTab({ onNavigate }: { onNavigate?: (type: string, da
         </div>
       </div>
 
-      {/* Map Controls */}
-      <div className="absolute right-6 bottom-28 flex flex-col gap-2 z-20">
-        <button 
-          onClick={handleZoomIn}
-          className="w-8 h-8 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors shadow-lg active:scale-95"
-        >
-          <Plus size={16} />
-        </button>
-        <button 
-          onClick={handleZoomOut}
-          className="w-8 h-8 rounded-full bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-colors shadow-lg active:scale-95"
-        >
-          <Minus size={16} />
-        </button>
-      </div>
+
 
       {/* Bottom Area */}
       <div className="absolute bottom-6 left-6 right-6 z-20 pointer-events-none flex flex-col gap-4">
