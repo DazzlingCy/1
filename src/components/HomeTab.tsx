@@ -1,12 +1,13 @@
 import { useState, useRef } from 'react';
-import { motion, useMotionValue, useTransform } from 'motion/react';
-import { Award, Zap, ChevronRight, Plus, Minus } from 'lucide-react';
+import { motion, useMotionValue, useTransform, AnimatePresence } from 'motion/react';
+import { Award, Zap, ChevronRight, Plus, Minus, X, CheckCircle2, Lock } from 'lucide-react';
 import { CITIES } from '../data/cities';
 import { cn } from '../lib/utils';
 
 export default function HomeTab() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [showStoryPanel, setShowStoryPanel] = useState(false);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.5, 0.5));
@@ -83,10 +84,10 @@ export default function HomeTab() {
             />
           </div>
           <div>
-            <div className="text-xs font-semibold tracking-wide text-slate-100">跑步先锋</div>
+            <div className="text-xs font-semibold tracking-wide text-slate-100">光迹探索者</div>
             <div className="flex items-center text-[10px] text-cyan-300">
-              <span className="mr-1">战力值:</span>
-              <span className="font-mono font-bold">9,240</span>
+              <span className="mr-1">光迹碎片:</span>
+              <span className="font-mono font-bold">120</span>
             </div>
           </div>
         </div>
@@ -118,13 +119,16 @@ export default function HomeTab() {
 
       {/* Bottom Mission Card (Teaser) */}
       <div className="absolute bottom-6 left-6 right-6 z-20 pointer-events-none">
-        <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden backdrop-blur-xl pointer-events-auto">
+        <div 
+          className="bg-slate-900/60 border border-white/10 rounded-2xl p-5 shadow-2xl relative overflow-hidden backdrop-blur-xl pointer-events-auto cursor-pointer hover:border-cyan-500/30 transition-colors"
+          onClick={() => setShowStoryPanel(true)}
+        >
            <div className="absolute -bottom-10 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
            <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-1.5">当前剧情任务</p>
-                <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-1 drop-shadow-sm">跑遍全世界：剧情第一季</h3>
-                <p className="text-xs text-slate-400 line-clamp-1">前往东京的隐秘跑道，解锁最终徽章。</p>
+                <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-1.5">主线计划</p>
+                <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-1 drop-shadow-sm">点亮地球计划</h3>
+                <p className="text-xs text-slate-400 line-clamp-1">第一章：第一道光（选择第一座城市，完成一条路线）</p>
               </div>
               <button className="w-10 h-10 border border-white/10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors shrink-0">
                 <ChevronRight className="text-cyan-400" size={20} />
@@ -134,15 +138,127 @@ export default function HomeTab() {
            <div className="mt-5 flex items-center w-full bg-white/5 rounded-full h-1 overflow-hidden border border-white/5">
              <motion.div 
                initial={{ width: 0 }}
-               animate={{ width: '65%' }}
+               animate={{ width: '5%' }}
                transition={{ duration: 1, delay: 0.5 }}
                className="h-full bg-cyan-400 relative"
              >
              </motion.div>
            </div>
-           <p className="text-[10px] text-slate-500 text-right mt-1.5 font-mono">进度 65%</p>
+           <p className="text-[10px] text-slate-500 text-right mt-1.5 font-mono">第 1 首发光迹待唤醒</p>
         </div>
       </div>
+
+      {/* Story Panel Overlay */}
+      <AnimatePresence>
+        {showStoryPanel && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="absolute inset-0 z-50 bg-[#05070A] flex flex-col"
+          >
+            <div className="flex items-center justify-between p-6 pb-2 border-b border-white/5 relative bg-gradient-to-b from-cyan-900/20 to-transparent">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 blur-3xl rounded-full pointer-events-none" />
+              <div>
+                <h2 className="text-2xl font-bold text-slate-100 mb-1">点亮地球计划</h2>
+                <p className="text-xs text-cyan-400 opacity-80 tracking-widest font-mono">MOVEVI World Light Project</p>
+              </div>
+              <button 
+                onClick={() => setShowStoryPanel(false)}
+                className="w-10 h-10 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center border border-white/10 transition-colors pointer-events-auto shadow-xl"
+              >
+                <X size={20} className="text-slate-300" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto px-6 py-6 pb-24 hide-scrollbar">
+              <p className="text-sm text-slate-300 leading-relaxed mb-6 font-medium">
+                通过复原600年前地球上真实存在的城市路线，让用户以运动的方式重新进入这些场景，唤醒沉睡的城市记忆，让人类重新记起母星。
+              </p>
+
+              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
+                {/* Chapter 1 */}
+                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)] shrink-0 z-10 font-bold text-xs relative">
+                    01
+                  </div>
+                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-cyan-500/30 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
+                     <h3 className="text-cyan-400 font-bold mb-1">第一章：第一道光</h3>
+                     <p className="text-xs text-slate-400 mb-3">熟悉内容基础阶段</p>
+                     <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
+                       用户刚加入计划，世界地图大部分是暗的。<br/>系统告诉用户：你需要选择第一座城市，完成一条路线。完成后，地球上亮起第一条光迹。
+                     </p>
+                     <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
+                        <CheckCircle2 size={12} className="mr-1" />
+                        进行中: 选择你的第一座城市
+                     </div>
+                  </div>
+                </div>
+
+                {/* Chapter 2 */}
+                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-slate-800 text-slate-400 shrink-0 z-10 font-bold text-xs">
+                    02
+                  </div>
+                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-white/5 rounded-2xl p-4 shadow-lg backdrop-blur-sm opacity-60">
+                     <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-slate-300 font-bold">第二章：沉睡的城市</h3>
+                        <Lock size={14} className="text-slate-500" />
+                     </div>
+                     <p className="text-xs text-slate-500 mb-3">单城市任务</p>
+                     <p className="text-[11px] text-slate-400 leading-relaxed">
+                       用户进入一座城市，比如巴黎。巴黎不是完整开放，而是有段城市记忆处于沉睡状态。每完成一条路线，就唤醒一个区域（塞纳河光迹等）。
+                     </p>
+                  </div>
+                </div>
+
+                {/* Chapter 3 */}
+                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-slate-800 text-slate-400 shrink-0 z-10 font-bold text-xs">
+                    03
+                  </div>
+                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-white/5 rounded-2xl p-4 shadow-lg backdrop-blur-sm opacity-60">
+                     <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-slate-300 font-bold">第三章：世界光迹网络</h3>
+                        <Lock size={14} className="text-slate-500" />
+                     </div>
+                     <p className="text-xs text-slate-500 mb-3">多城市任务开启</p>
+                     <p className="text-[11px] text-slate-400 leading-relaxed">
+                       当用户点亮多座城市后，开启系列城市任务。比如：点亮巴黎+伦敦+罗马，解锁：欧洲文明光带。
+                     </p>
+                  </div>
+                </div>
+
+                {/* Chapter 4 */}
+                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-slate-800 text-slate-400 shrink-0 z-10 font-bold text-xs">
+                    04
+                  </div>
+                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-white/5 rounded-2xl p-4 shadow-lg backdrop-blur-sm opacity-60">
+                     <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-slate-300 font-bold">第四章：第100座城市</h3>
+                        <Lock size={14} className="text-slate-500" />
+                     </div>
+                     <p className="text-[11px] text-slate-400 leading-relaxed mt-2">
+                       当用户持续点亮城市后，需要通过完成更多城市，收集获得最终勋章。长期悬念给予持续吸引力。
+                     </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            
+            <div className="p-4 bg-black/80 backdrop-blur-md border-t border-white/5 shrink-0">
+               <button 
+                 onClick={() => setShowStoryPanel(false)}
+                 className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+               >
+                 开始探索
+               </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
