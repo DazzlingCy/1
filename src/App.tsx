@@ -8,10 +8,12 @@ import ProfileTab from './components/ProfileTab';
 import CityRoutesView from './components/CityRoutesView';
 import RouteDetailView from './components/RouteDetailView';
 import RunPlaybackView from './components/RunPlaybackView';
+import LitRecordsView from './components/LitRecordsView';
+import LeaderboardView from './components/LeaderboardView';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
-  const [fullScreenPage, setFullScreenPage] = useState<{type: 'cityRoutes' | 'routeDetail' | 'runPlayback', data: any} | null>(null);
+  const [fullScreenPage, setFullScreenPage] = useState<{type: 'cityRoutes' | 'routeDetail' | 'runPlayback' | 'litRecords' | 'leaderboard', data?: any} | null>(null);
 
   const tabs = [
     { id: 'home', label: '首页', icon: Compass },
@@ -124,6 +126,12 @@ export default function App() {
                    setFullScreenPage({ type: 'cityRoutes', data: { ...previousCityData } });
                  }}
                />
+            )}
+            {fullScreenPage.type === 'litRecords' && (
+              <LitRecordsView onBack={() => setFullScreenPage(null)} />
+            )}
+            {fullScreenPage.type === 'leaderboard' && (
+              <LeaderboardView onBack={() => setFullScreenPage(null)} />
             )}
           </motion.div>
         )}

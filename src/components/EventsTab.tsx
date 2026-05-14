@@ -9,7 +9,7 @@ export default function EventsTab() {
       </div>
 
       <div className="p-4 space-y-6">
-        {/* Banner 1: 勋章抽奖 */}
+        {/* Banner 1: 新手专属 */}
         <motion.div
           whileTap={{ scale: 0.98 }}
           initial={{ opacity: 0, y: 20 }}
@@ -86,6 +86,7 @@ export default function EventsTab() {
             <p className="text-[10px] text-purple-300/50 font-mono mt-1 w-full text-right">已解锁 24/100</p>
           </div>
         </motion.div>
+
       </div>
     </div>
   );
