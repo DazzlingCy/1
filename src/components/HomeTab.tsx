@@ -15,32 +15,27 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
   const litCount = CITIES.filter(c => c.status === 'lit').length;
   const inProgressCity = CITIES.find(c => c.status === 'in-progress');
   
-  let currentChapterText = "第一章：第一道光（选择第一座城市，完成一条路线）";
+  let currentChapterText = "第一城：杭州，记忆唤醒的起点";
   let progressWidth = '5%';
   
-  if (completedChapters.includes(4)) {
-    currentChapterText = "所有章节已完成（地球倒影已解锁）";
-    progressWidth = '100%';
-  } else if (completedChapters.includes(3)) {
-    currentChapterText = `第四章：最终的母星记忆（点亮所有城市 ${litCount}/${CITIES.length}）`;
+  if (completedChapters.includes(2)) {
+    // Determine the progress width based on lit count (out of all cities potentially)
     progressWidth = `${(litCount / CITIES.length) * 100}%`;
-  } else if (completedChapters.includes(2)) {
-    currentChapterText = `第三章：世界光迹网络（点亮三座城市 ${litCount}/3）`;
-    progressWidth = `${(litCount / 3) * 100}%`;
-  } else if (completedChapters.includes(1)) {
-    currentChapterText = `第二章：城市唤醒者（点亮第一座城市）`;
-    if (inProgressCity) {
-      progressWidth = `${(inProgressCity.completed / inProgressCity.routes) * 100}%`;
-    } else {
-      progressWidth = '0%';
-    }
-  } else {
-    currentChapterText = "第一章：第一道光（选择第一座城市，完成一条路线）";
-    if (inProgressCity) {
-      progressWidth = `${(inProgressCity.completed / inProgressCity.routes) * 100}%`;
-    } else {
-      progressWidth = '0%';
-    }
+  }
+  
+  const numMap = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+
+  if (inProgressCity) {
+    const cityIndex = CITIES.findIndex(c => c.id === inProgressCity.id);
+    const numStr = numMap[cityIndex] || (cityIndex + 1).toString();
+    currentChapterText = `第${numStr}城：${inProgressCity.name}，${inProgressCity.description}`;
+    
+    // Calculate progress as a percentage of overall completion + current city progress
+    // If not using chapters anymore, maybe just progress of current city
+    progressWidth = `${(inProgressCity.completed / inProgressCity.routes) * 100}%`;
+  } else if (litCount === CITIES.length) {
+    currentChapterText = "所有城市已点亮（地球倒影已解锁）";
+    progressWidth = '100%';
   }
 
   const handleConnectTreadmill = () => {
@@ -537,115 +532,41 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
               </div>
 
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
-                {/* Chapter 1 */}
-                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(1) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]'} shrink-0 z-10 font-bold text-xs relative`}>
-                    01
-                  </div>
-                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(1) ? 'border-[#2ecc71]/30' : 'border-cyan-500/30'} rounded-2xl p-4 shadow-lg backdrop-blur-sm`}>
-                     <h3 className={`${completedChapters.includes(1) ? 'text-[#2ecc71]' : 'text-cyan-400'} font-bold mb-1`}>第一章：第一道光</h3>
-                     <p className="text-xs text-slate-400 mb-3 font-mono">记忆唤醒的起点</p>
-                     <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
-                       当你刚加入计划时，世界地图大部分是暗的。你需要选择第一座城市，沿着真实的城市路线出发，收集散落在地球上的光迹碎片。
-                     </p>
-                     {completedChapters.includes(1) ? (
-                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
-                           <CheckCircle2 size={12} className="mr-1" />
-                           已完成: 第一条光迹已唤醒
-                        </div>
-                     ) : (
-                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
-                           <Activity size={12} className="mr-1" />
-                           进行中: 第一条光迹待唤醒
-                        </div>
-                     )}
-                  </div>
-                </div>
+                {CITIES.map((city, index) => {
+                  const numStr = numMap[index] || (index + 1).toString();
+                  const isLit = city.status === 'lit';
+                  const isInProgress = city.status === 'in-progress';
+                  const isLocked = city.status === 'unlit';
 
-                {/* Chapter 2 */}
-                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(2) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : completedChapters.includes(1) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
-                    02
-                  </div>
-                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(2) ? 'border-[#2ecc71]/30' : completedChapters.includes(1) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(1) ? '' : 'opacity-60'}`}>
-                     <div className="flex items-center justify-between mb-1">
-                        <h3 className={`${completedChapters.includes(2) ? 'text-[#2ecc71]' : completedChapters.includes(1) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第二章：沉睡的城市</h3>
-                        {!completedChapters.includes(1) && <Lock size={14} className="text-slate-500" />}
-                     </div>
-                     <p className="text-xs text-slate-500 mb-3 font-mono">单座城市的深度解密</p>
-                     <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
-                       进入巴黎等城市。城市并非完整开放，无数路段仍处于沉睡。每完成一条路线，你将唤醒一个区域（如塞纳河、埃菲尔、卢浮宫）。点亮全部区域，让整座城市重现星河。
-                     </p>
-                     {completedChapters.includes(2) ? (
-                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
-                           <CheckCircle2 size={12} className="mr-1" />
-                           已完成: 城市已重现星河
-                        </div>
-                     ) : completedChapters.includes(1) ? (
-                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
-                           <Activity size={12} className="mr-1" />
-                           进行中: 探索沉睡的城市
-                        </div>
-                     ) : null}
-                  </div>
-                </div>
-
-                {/* Chapter 3 */}
-                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(3) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : completedChapters.includes(2) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
-                    03
-                  </div>
-                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(3) ? 'border-[#2ecc71]/30' : completedChapters.includes(2) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(2) ? '' : 'opacity-60'}`}>
-                     <div className="flex items-center justify-between mb-1">
-                        <h3 className={`${completedChapters.includes(3) ? 'text-[#2ecc71]' : completedChapters.includes(2) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第三章：世界光迹网络</h3>
-                        {!completedChapters.includes(2) && <Lock size={14} className="text-slate-500" />}
-                     </div>
-                     <p className="text-xs text-slate-500 mb-3 font-mono">从点到面的文明复苏</p>
-                     <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
-                       当你点亮多座城市后，系列任务将随之开启。唤醒“巴黎+伦敦+罗马”，解锁欧洲文明光带；点亮“东京+京都+首尔”，重构东亚城市光带。连点成线，复织世界的光迹网络。
-                     </p>
-                     {completedChapters.includes(3) ? (
-                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
-                           <CheckCircle2 size={12} className="mr-1" />
-                           已完成: 区域光带解锁
-                        </div>
-                     ) : completedChapters.includes(2) ? (
-                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
-                           <Activity size={12} className="mr-1" />
-                           进行中: 复织世界网络
-                        </div>
-                     ) : null}
-                  </div>
-                </div>
-
-                {/* Chapter 4 */}
-                <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(4) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : completedChapters.includes(3) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
-                    04
-                  </div>
-                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(4) ? 'border-[#2ecc71]/30' : completedChapters.includes(3) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(3) ? '' : 'opacity-60'}`}>
-                     <div className="flex items-center justify-between mb-1">
-                        <h3 className={`${completedChapters.includes(4) ? 'text-[#2ecc71]' : completedChapters.includes(3) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第四章：最终的母星记忆</h3>
-                        {!completedChapters.includes(3) && <Lock size={14} className="text-slate-500" />}
-                     </div>
-                     <p className="text-xs text-slate-500 mb-3 font-mono">第{CITIES.length}座城市</p>
-                     <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
-                       持之以恒地探索，直到触及所有的边缘。收集散落的最终碎片，获得至高无上的回归勋章。长路的尽头，是地球最完整的倒影。
-                     </p>
-                     {completedChapters.includes(4) ? (
-                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
-                           <CheckCircle2 size={12} className="mr-1" />
-                           已完成: 地球倒影
-                        </div>
-                     ) : completedChapters.includes(3) ? (
-                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
-                           <Activity size={12} className="mr-1" />
-                           进行中: 漫长的巡礼
-                        </div>
-                     ) : null}
-                  </div>
-                </div>
-
+                  return (
+                    <div key={city.id} className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group ${!isLocked ? 'is-active' : ''}`}>
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${isLit ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : isInProgress ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs relative`}>
+                        {String(index + 1).padStart(2, '0')}
+                      </div>
+                      <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${isLit ? 'border-[#2ecc71]/30' : isInProgress ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${isLocked ? 'opacity-60' : ''}`}>
+                         <div className="flex items-center justify-between mb-1">
+                            <h3 className={`${isLit ? 'text-[#2ecc71]' : isInProgress ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第{numStr}城：{city.name}</h3>
+                            {isLocked && <Lock size={14} className="text-slate-500" />}
+                         </div>
+                         <p className="text-xs text-slate-400 mb-3 font-mono">{city.continent} · {city.englishName}</p>
+                         <p className={`text-[11px] leading-relaxed mb-3 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`}>
+                           {city.description}
+                         </p>
+                         {isLit ? (
+                            <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono w-fit">
+                               <CheckCircle2 size={12} className="mr-1" />
+                               已完成: 城市卡片已解锁
+                            </div>
+                         ) : isInProgress ? (
+                            <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono w-fit">
+                               <Activity size={12} className="mr-1" />
+                               进行中: 唤醒进度 {city.completed}/{city.routes}
+                            </div>
+                         ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
             

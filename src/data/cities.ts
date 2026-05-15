@@ -16,21 +16,22 @@ export interface CityData {
   completedRouteIndices?: number[];
   justLit?: boolean;
   labelPosition?: LabelPosition;
+  description?: string;
 }
 
 export const CITIES: CityData[] = [
-  { id: '1', name: '杭州', englishName: 'Hangzhou', continent: '中国', x: 83.5, y: 33.8, image: 'https://picsum.photos/id/28/400/300', routes: 3, spots: 24, completed: 0, status: 'in-progress', completedRouteIndices: [], labelPosition: 'bottom' },
-  { id: '2', name: '北京', englishName: 'Beijing', continent: '中国', x: 82.33, y: 27.83, image: 'https://picsum.photos/id/164/400/300', routes: 3, spots: 15, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top' },
-  { id: '3', name: '上海', englishName: 'Shanghai', continent: '中国', x: 84.8, y: 32.5, image: 'https://picsum.photos/id/122/400/300', routes: 3, spots: 83, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
-  { id: '4', name: '南京', englishName: 'Nanjing', continent: '中国', x: 82.5, y: 31.8, image: 'https://picsum.photos/id/315/400/300', routes: 3, spots: 71, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'left' },
-  { id: '5', name: '西安', englishName: 'Xi\'an', continent: '中国', x: 80.25, y: 30.94, image: 'https://picsum.photos/id/292/400/300', routes: 3, spots: 66, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'left' },
-  { id: '6', name: '东京', englishName: 'Tokyo', continent: '亚洲其他', x: 88.80, y: 30.16, image: 'https://picsum.photos/id/274/400/300', routes: 3, spots: 120, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
-  { id: '7', name: '巴黎', englishName: 'Paris', continent: '欧洲', x: 50.63, y: 22.83, image: 'https://picsum.photos/id/192/400/300', routes: 3, spots: 90, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'bottom' },
-  { id: '8', name: '伦敦', englishName: 'London', continent: '欧洲', x: 49.3, y: 21.0, image: 'https://picsum.photos/id/246/400/300', routes: 3, spots: 140, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top' },
-  { id: '9', name: '纽约', englishName: 'New York', continent: '北美洲', x: 29.44, y: 27.38, image: 'https://picsum.photos/id/373/400/300', routes: 3, spots: 110, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top' },
-  { id: '10', name: '悉尼', englishName: 'Sydney', continent: '大洋洲', x: 92.00, y: 68.83, image: 'https://picsum.photos/id/214/400/300', routes: 3, spots: 85, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
-  { id: '11', name: '里约热内卢', englishName: 'Rio', continent: '南美洲', x: 38.00, y: 62.72, image: 'https://picsum.photos/id/111/400/300', routes: 3, spots: 50, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
-  { id: '12', name: '开罗', englishName: 'Cairo', continent: '非洲', x: 58.66, y: 33.33, image: 'https://picsum.photos/id/230/400/300', routes: 3, spots: 60, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
+  { id: '1', name: '杭州', englishName: 'Hangzhou', continent: '中国', x: 83.5, y: 33.8, image: 'https://picsum.photos/id/28/400/300', routes: 3, spots: 24, completed: 0, status: 'in-progress', completedRouteIndices: [], labelPosition: 'bottom', description: '记忆唤醒的起点，从婉约西湖到现代钱江新城，水光潋滟间感受文明与科技的交融。' },
+  { id: '2', name: '北京', englishName: 'Beijing', continent: '中国', x: 82.33, y: 27.83, image: 'https://picsum.photos/id/164/400/300', routes: 3, spots: 15, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top', description: '皇城根下的厚重与现代都市的脉动同频，穿越古都的中轴线，点亮华夏文明的心脏。' },
+  { id: '3', name: '上海', englishName: 'Shanghai', continent: '中国', x: 84.8, y: 32.5, image: 'https://picsum.photos/id/122/400/300', routes: 3, spots: 83, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right', description: '魔都霓虹闪烁，黄浦江畔的万国建筑群与陆家嘴的天际线诉说着新旧交替的繁华。' },
+  { id: '4', name: '南京', englishName: 'Nanjing', continent: '中国', x: 82.5, y: 31.8, image: 'https://picsum.photos/id/315/400/300', routes: 3, spots: 71, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'left', description: '六朝古都的金陵梦，秦淮河畔的桨声灯影，中山陵的巍峨，金陵帝王州的沧桑与壮丽。' },
+  { id: '5', name: '西安', englishName: 'Xi\'an', continent: '中国', x: 80.25, y: 30.94, image: 'https://picsum.photos/id/292/400/300', routes: 3, spots: 66, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'left', description: '十三朝古都的长安城，兵马俑的震撼，大雁塔的古音，穿越千年时光的丝界起点。' },
+  { id: '6', name: '东京', englishName: 'Tokyo', continent: '亚洲其他', x: 88.80, y: 30.16, image: 'https://picsum.photos/id/274/400/300', routes: 3, spots: 120, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right', description: '樱花、铁塔与喧闹的十字街头，二次元与传统的碰撞，在这座超级都市寻找失落的霓虹记忆。' },
+  { id: '7', name: '巴黎', englishName: 'Paris', continent: '欧洲', x: 50.63, y: 22.83, image: 'https://picsum.photos/id/192/400/300', routes: 3, spots: 90, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'bottom', description: '浪漫之都的塞纳河畔，埃菲尔铁塔的星光，卢浮宫的艺术瑰宝，光之城的优雅与永恒。' },
+  { id: '8', name: '伦敦', englishName: 'London', continent: '欧洲', x: 49.3, y: 21.0, image: 'https://picsum.photos/id/246/400/300', routes: 3, spots: 140, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top', description: '泰晤士河的钟声回荡，西区的戏剧人生，雾都的神秘与绅士风度，日不落帝国的光影印记。' },
+  { id: '9', name: '纽约', englishName: 'New York', continent: '北美洲', x: 29.44, y: 27.38, image: 'https://picsum.photos/id/373/400/300', routes: 3, spots: 110, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top', description: '大苹果城的摩天大楼森林，时代广场的喧嚣不夜城，自由女神的火炬，世界熔炉的无限活力。' },
+  { id: '10', name: '悉尼', englishName: 'Sydney', continent: '大洋洲', x: 92.00, y: 68.83, image: 'https://picsum.photos/id/214/400/300', routes: 3, spots: 85, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right', description: '南半球的明珠，悉尼歌剧院的风帆，达令港的碧波浪影，大洋洲的阳光与海滩。' },
+  { id: '11', name: '里约热内卢', englishName: 'Rio', continent: '南美洲', x: 38.00, y: 62.72, image: 'https://picsum.photos/id/111/400/300', routes: 3, spots: 50, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right', description: '基督像俯瞰的绝美海湾，科帕卡巴纳海滩的热情，桑巴狂欢节的律动，热带雨林的自由。' },
+  { id: '12', name: '开罗', englishName: 'Cairo', continent: '非洲', x: 58.66, y: 33.33, image: 'https://picsum.photos/id/230/400/300', routes: 3, spots: 60, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right', description: '尼罗河畔的古老金字塔，狮身人面像的千古谜题，文明古国的神秘与黄沙中的信仰。' },
 ];
 
 export const CONTINENTS_ORDER = ['中国', '亚洲其他', '欧洲', '非洲', '北美洲', '南美洲', '大洋洲'];
