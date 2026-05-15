@@ -14,6 +14,7 @@ interface CityRoutesViewProps {
 
 export default function CityRoutesView({ city, onBack, onRouteClick, onExploreNext }: CityRoutesViewProps) {
   const [showLitModal, setShowLitModal] = useState(false);
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [activeTab, setActiveTab] = useState(city.id === '1' ? '环西湖' : '精选推荐');
 
   const tabs = city.id === '1' 
@@ -22,6 +23,7 @@ export default function CityRoutesView({ city, onBack, onRouteClick, onExploreNe
 
   useEffect(() => {
     if (city.justLit) {
+      setIsCardFlipped(false);
       setShowLitModal(true);
     }
   }, [city.justLit]);
@@ -167,31 +169,64 @@ export default function CityRoutesView({ city, onBack, onRouteClick, onExploreNe
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 perspective-[1000px]"
           >
-             <motion.div 
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center text-center relative overflow-hidden"
+             <motion.div
+                initial={{ opacity: 0, y: 50, rotateX: 10 }}
+                animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 0.5, type: "spring" }}
+                className="w-full max-w-sm flex flex-col items-center"
              >
-                <div className="w-20 h-20 bg-[#fff9f0] rounded-full flex items-center justify-center mb-4 ring-4 ring-[#ffb48f]/50 relative z-10">
-                  <Globe2 size={40} className="text-[#f45c2c]" />
+                <div className="w-full text-center mb-6">
+                  <h2 className="text-2xl font-bold text-white mb-2 tracking-widest">{isCardFlipped ? "获得城市卡片" : "城市已点亮！"}</h2>
+                  <p className="text-cyan-400 text-sm">{isCardFlipped ? "CITY CARD ACQUIRED" : "点击卡片翻开你的奖励"}</p>
                 </div>
-                
-                <h2 className="text-2xl font-bold text-slate-800 mb-1 tracking-widest relative z-10">城市已点亮！</h2>
-                <p className="text-[#f45c2c] text-xs font-mono mb-6 relative z-10">CITY AWAKENED</p>
 
-                <p className="text-sm text-slate-600 leading-relaxed font-medium mb-8">
-                  {city.name} 的所有光迹均已唤醒。这座城市的隐藏形态已解锁，地球因你而闪耀。
-                </p>
-
-                <button 
-                  onClick={handleCloseLitModal}
-                  className="w-full py-3.5 bg-gradient-to-r from-[#ff8c5a] to-[#f45c2c] text-white font-bold rounded-xl transition-all shadow-lg shadow-[#f45c2c]/30 active:scale-95"
+                <div 
+                   className="relative w-64 h-[360px] [transform-style:preserve-3d] cursor-pointer transition-transform duration-700 hover:scale-105"
+                   onClick={() => setIsCardFlipped(true)}
+                   style={{ transform: isCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
                 >
-                  继续探索其他城市
-                </button>
+                   {/* Card Back */}
+                   <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-800 border-2 border-white/20 rounded-2xl shadow-2xl flex flex-col items-center justify-center">
+                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 rounded-2xl"></div>
+                     <div className="w-20 h-20 bg-slate-700/50 rounded-full flex items-center justify-center mb-4 border border-white/10 relative overflow-hidden">
+                       <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-transparent animate-pulse" />
+                       <Globe2 size={40} className="text-slate-400" />
+                     </div>
+                     <p className="text-slate-400 text-xs font-mono mb-2 tracking-widest relative z-10">TAP TO REVEAL</p>
+                     <div className="text-white/30 text-3xl animate-bounce mt-4 relative z-10">👆</div>
+                   </div>
+
+                   {/* Card Front */}
+                   <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-2xl shadow-[0_0_40px_rgba(34,211,238,0.4)] overflow-hidden bg-slate-900 border border-white/20 flex flex-col">
+                      <div className="h-[60%] relative">
+                        <img src={city.image} alt={city.name} className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+                      </div>
+                      <div className="flex-1 p-6 flex flex-col items-center justify-center text-center -mt-6 relative z-10">
+                         <h3 className="text-3xl font-bold text-white mb-1 drop-shadow-md">{city.name}</h3>
+                         <div className="text-xs text-slate-400 font-mono tracking-widest uppercase">{city.englishName}</div>
+                         <div className="mt-4 px-3 py-1 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] rounded-full uppercase tracking-widest">
+                           {city.routes} Routes Completed
+                         </div>
+                      </div>
+                   </div>
+                </div>
+
+                <AnimatePresence>
+                  {isCardFlipped && (
+                    <motion.button 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      onClick={handleCloseLitModal}
+                      className="mt-10 px-8 py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] active:scale-95"
+                    >
+                      继续探索世界
+                    </motion.button>
+                  )}
+                </AnimatePresence>
              </motion.div>
           </motion.div>
         )}

@@ -34,7 +34,15 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab onNavigate={(type, data) => setFullScreenPage({ type, data })} completedChapters={completedChapters} targetFlight={targetFlight} onFlightComplete={() => setTargetFlight(null)} />;
+        return <HomeTab onNavigate={(type, data) => setFullScreenPage({ type, data })} completedChapters={completedChapters} targetFlight={targetFlight} onFlightComplete={() => {
+          if (targetFlight) {
+            const nextCity = CITIES.find(c => c.id === targetFlight.toCityId);
+            if (nextCity && nextCity.status === 'unlit') {
+              nextCity.status = 'in-progress';
+            }
+          }
+          setTargetFlight(null);
+        }} />;
       case 'events':
         return <EventsTab />;
       case 'cities':
@@ -105,20 +113,15 @@ export default function App() {
                    data: { cityId: fullScreenPage.data.id, routeIndex, image: fullScreenPage.data.image, previousCityData: fullScreenPage.data } 
                  })} 
                  onExploreNext={(currentCityId) => {
-                   import('./data/cities').then(({ CITIES }) => {
-                     const currentIndex = CITIES.findIndex(c => c.id === currentCityId);
-                     let nextIndex = (currentIndex + 1) % CITIES.length;
-                     while (CITIES[nextIndex].status === 'lit' && nextIndex !== currentIndex) {
-                       nextIndex = (nextIndex + 1) % CITIES.length;
-                     }
-                     const nextCity = CITIES[nextIndex];
-                     if (nextCity.status === 'unlit') {
-                       nextCity.status = 'in-progress';
-                     }
-                     setTargetFlight({ fromCityId: currentCityId, toCityId: nextCity.id });
-                     setFullScreenPage(null);
-                     setActiveTab('home');
-                   });
+                   const currentIndex = CITIES.findIndex(c => c.id === currentCityId);
+                   let nextIndex = (currentIndex + 1) % CITIES.length;
+                   while (CITIES[nextIndex].status === 'lit' && nextIndex !== currentIndex) {
+                     nextIndex = (nextIndex + 1) % CITIES.length;
+                   }
+                   const nextCity = CITIES[nextIndex];
+                   setTargetFlight({ fromCityId: currentCityId, toCityId: nextCity.id });
+                   setFullScreenPage(null);
+                   setActiveTab('home');
                  }}
                />
             )}
@@ -158,12 +161,6 @@ export default function App() {
                      previousCityData.justLit = true;
                      // Increment completed cities counter
                      setUserStats(prev => ({ ...prev, completedCities: prev.completedCities + 1 }));
-                     
-                     // Set the next unlit city to in-progress
-                     const nextUnlit = CITIES.find(c => c.status === 'unlit');
-                     if (nextUnlit) {
-                       nextUnlit.status = 'in-progress';
-                     }
                    }
 
                    setCompletedChapters(prev => {

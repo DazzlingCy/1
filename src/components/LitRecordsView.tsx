@@ -1,12 +1,18 @@
 import { ChevronRight, Globe2, MapPin, Zap } from 'lucide-react';
-import { CITIES } from '../data/cities';
+import { CITIES, getRouteData } from '../data/cities';
 
 interface LitRecordsViewProps {
   onBack: () => void;
 }
 
 export default function LitRecordsView({ onBack }: LitRecordsViewProps) {
-  const litCities = CITIES.filter(c => c.completedRouteIndices && c.completedRouteIndices.length > 0);
+  const litRoutes = CITIES.flatMap(city => 
+    (city.completedRouteIndices || []).map(routeId => ({
+      city,
+      routeId,
+      routeData: getRouteData(city.id, routeId)
+    }))
+  );
 
   return (
     <div className="w-full h-full bg-[#05070A] overflow-y-auto pb-24 text-slate-100 font-sans hide-scrollbar relative">
@@ -25,54 +31,45 @@ export default function LitRecordsView({ onBack }: LitRecordsViewProps) {
           <h3 className="text-sm font-semibold text-cyan-400 uppercase tracking-widest flex items-center">
             <Zap size={16} className="mr-2" /> 探索光迹
           </h3>
-          <span className="text-[10px] text-slate-500 font-mono">Total {litCities.length} Cities</span>
+          <span className="text-[10px] text-slate-500 font-mono">Total {litRoutes.length} Routes</span>
         </div>
 
         <div className="space-y-4">
-          {litCities.length === 0 ? (
+          {litRoutes.length === 0 ? (
              <div className="text-center py-12 bg-white/5 border border-white/10 rounded-2xl">
-               <p className="text-xs text-slate-500">暂无点亮记录，快去探索城市吧</p>
+               <p className="text-xs text-slate-500">暂无点亮记录，快去探索路线吧</p>
              </div>
           ) : (
-            litCities.map((city) => (
-              <div key={city.id} className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg overflow-hidden relative">
+            litRoutes.map(({ city, routeId, routeData }, index) => (
+              <div key={`${city.id}-${routeId}-${index}`} className="bg-white/5 border border-white/10 rounded-2xl p-4 shadow-lg overflow-hidden relative">
                 {city.status === 'lit' && (
                   <div className="absolute top-0 right-0 w-16 h-16 bg-amber-500/20 -translate-y-1/2 translate-x-1/2 rounded-full blur-xl pointer-events-none" />
                 )}
-                <div className="flex justify-between items-center mb-4 relative z-10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-slate-800 rounded-xl overflow-hidden shrink-0 relative">
-                      <img src={city.image} alt={city.name} className="absolute inset-0 w-full h-full object-cover opacity-80" />
-                      {city.status === 'lit' && (
-                        <div className="absolute inset-0 bg-amber-500/20 flex items-center justify-center backdrop-blur-[1px]">
-                          <Globe2 size={16} className="text-amber-400 drop-shadow-md" />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                        {city.name}
-                        {city.status === 'lit' && <span className="text-[8px] bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30">已点亮</span>}
-                      </h4>
-                      <div className="text-[10px] text-slate-500 mt-1 flex items-center gap-2">
-                        <span>{city.continent}</span>
-                        <span className="w-1 h-1 bg-slate-700 rounded-full" />
-                        <span>进度 {city.completed}/{city.routes}</span>
+                <div className="flex gap-4 relative z-10">
+                  <div className="w-20 h-20 bg-slate-800 rounded-xl overflow-hidden shrink-0 relative">
+                    <img src={city.image} alt={city.name} className="absolute inset-0 w-full h-full object-cover opacity-80" />
+                    {city.status === 'lit' && (
+                      <div className="absolute inset-0 bg-amber-500/20 flex items-center justify-center backdrop-blur-[1px]">
+                        <Globe2 size={16} className="text-amber-400 drop-shadow-md" />
                       </div>
+                    )}
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center">
+                    <div className="text-[10px] text-slate-400 flex items-center gap-1 mb-1">
+                      <MapPin size={10} className="text-cyan-500" />
+                      {city.name} · {city.continent}
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-100 mb-1 leading-snug">
+                      {routeData.title}
+                    </h4>
+                    <div className="text-[10px] flex items-center gap-2 text-slate-400 font-mono">
+                      <span>{routeData.distance} km</span>
+                      <span className="w-1 h-1 bg-slate-600 rounded-full" />
+                      <span>{routeData.duration}</span>
+                      <span className="w-1 h-1 bg-slate-600 rounded-full" />
+                      <span className="text-cyan-400">已唤醒</span>
                     </div>
                   </div>
-                </div>
-
-                <div className="space-y-2 relative z-10">
-                  {city.completedRouteIndices?.map((routeId) => (
-                    <div key={routeId} className="flex items-center justify-between bg-black/40 rounded-lg p-2.5 border border-white/5">
-                      <div className="flex items-center gap-2">
-                        <MapPin size={12} className="text-cyan-500" />
-                        <span className="text-xs text-slate-300 font-medium">路线 {routeId}：精粹探索路线</span>
-                      </div>
-                      <span className="text-[10px] text-cyan-400/80 font-mono">已唤醒</span>
-                    </div>
-                  ))}
                 </div>
               </div>
             ))

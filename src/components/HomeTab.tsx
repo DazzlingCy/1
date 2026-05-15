@@ -388,7 +388,7 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                 {inProgressCity && (
                   <div className="mt-2 text-[10px] text-cyan-400 font-mono flex items-center bg-cyan-500/10 w-fit px-2 py-1 rounded">
                     <MapPin size={12} className="mr-1" />
-                    当前运动: {inProgressCity.name} ({inProgressCity.completed}/{inProgressCity.routes} 路线)
+                    当前运动: {inProgressCity.name}({inProgressCity.completed}/{inProgressCity.routes}路线)
                   </div>
                 )}
               </div>
