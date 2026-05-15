@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Play } from 'lucide-react';
-import { CITIES_BY_CONTINENT, CONTINENTS_ORDER } from '../data/cities';
+import { CITIES_BY_CONTINENT, CONTINENTS_ORDER, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
 const CONTINENT_ICONS: Record<string, string> = {
@@ -14,7 +14,7 @@ const CONTINENT_ICONS: Record<string, string> = {
   '大洋洲': '🗿'
 };
 
-export default function CitiesTab() {
+export default function CitiesTab({ onCityClick }: { onCityClick?: (city: CityData) => void }) {
   const [activeContinent, setActiveContinent] = useState(CONTINENTS_ORDER[0]);
 
   return (
@@ -74,7 +74,8 @@ export default function CitiesTab() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 shadow-lg flex p-2.5 gap-4"
+                onClick={() => onCityClick && onCityClick(city)}
+                className="bg-white/5 rounded-2xl overflow-hidden border border-white/10 shadow-lg flex p-2.5 gap-4 cursor-pointer hover:bg-white/10 transition-colors"
               >
                 <div className="relative w-[110px] h-[110px] shrink-0 rounded-xl overflow-hidden">
                   <img 

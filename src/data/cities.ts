@@ -19,18 +19,18 @@ export interface CityData {
 }
 
 export const CITIES: CityData[] = [
-  { id: '1', name: '杭州', englishName: 'Hangzhou', continent: '中国', x: 83.5, y: 33.8, image: 'https://images.unsplash.com/photo-1555899434-94d1368aa7af?auto=format&fit=crop&q=80&w=400&h=300', routes: 3, spots: 24, completed: 2, status: 'in-progress', completedRouteIndices: [1, 2], labelPosition: 'bottom' },
-  { id: '2', name: '北京', englishName: 'Beijing', continent: '中国', x: 82.33, y: 27.83, image: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?auto=format&fit=crop&q=80&w=400&h=300', routes: 26, spots: 252, completed: 26, status: 'lit', labelPosition: 'top' },
-  { id: '3', name: '上海', englishName: 'Shanghai', continent: '中国', x: 84.8, y: 32.5, image: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&q=80&w=400&h=300', routes: 14, spots: 83, completed: 0, status: 'unlit', labelPosition: 'right' },
-  { id: '4', name: '南京', englishName: 'Nanjing', continent: '中国', x: 82.5, y: 31.8, image: 'https://images.unsplash.com/photo-1582650073289-53b52a1fe182?auto=format&fit=crop&q=80&w=400&h=300', routes: 12, spots: 71, completed: 0, status: 'unlit', labelPosition: 'left' },
-  { id: '5', name: '西安', englishName: 'Xi\'an', continent: '中国', x: 80.25, y: 30.94, image: 'https://images.unsplash.com/photo-1508804185872-d7bad800f13e?auto=format&fit=crop&q=80&w=400&h=300', routes: 11, spots: 66, completed: 0, status: 'unlit', labelPosition: 'left' },
-  { id: '6', name: '东京', englishName: 'Tokyo', continent: '亚洲其他', x: 88.80, y: 30.16, image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&q=80&w=400&h=300', routes: 18, spots: 120, completed: 0, status: 'unlit', labelPosition: 'right' },
-  { id: '7', name: '巴黎', englishName: 'Paris', continent: '欧洲', x: 50.63, y: 22.83, image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&q=80&w=400&h=300', routes: 15, spots: 90, completed: 15, status: 'lit', labelPosition: 'bottom' },
-  { id: '8', name: '伦敦', englishName: 'London', continent: '欧洲', x: 49.3, y: 21.0, image: 'https://images.unsplash.com/photo-1520986606214-8b456906c813?auto=format&fit=crop&q=80&w=400&h=300', routes: 22, spots: 140, completed: 0, status: 'unlit', labelPosition: 'top' },
-  { id: '9', name: '纽约', englishName: 'New York', continent: '北美洲', x: 29.44, y: 27.38, image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&q=80&w=400&h=300', routes: 20, spots: 110, completed: 0, status: 'unlit', labelPosition: 'top' },
-  { id: '10', name: '悉尼', englishName: 'Sydney', continent: '大洋洲', x: 92.00, y: 68.83, image: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&q=80&w=400&h=300', routes: 10, spots: 85, completed: 0, status: 'unlit', labelPosition: 'right' },
-  { id: '11', name: '里约热内卢', englishName: 'Rio', continent: '南美洲', x: 38.00, y: 62.72, image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&q=80&w=400&h=300', routes: 8, spots: 50, completed: 0, status: 'unlit', labelPosition: 'right' },
-  { id: '12', name: '开罗', englishName: 'Cairo', continent: '非洲', x: 58.66, y: 33.33, image: 'https://images.unsplash.com/photo-1539667468225-eebb663053e6?auto=format&fit=crop&q=80&w=400&h=300', routes: 9, spots: 60, completed: 0, status: 'unlit', labelPosition: 'right' },
+  { id: '1', name: '杭州', englishName: 'Hangzhou', continent: '中国', x: 83.5, y: 33.8, image: 'https://picsum.photos/id/28/400/300', routes: 3, spots: 24, completed: 0, status: 'in-progress', completedRouteIndices: [], labelPosition: 'bottom' },
+  { id: '2', name: '北京', englishName: 'Beijing', continent: '中国', x: 82.33, y: 27.83, image: 'https://picsum.photos/id/164/400/300', routes: 3, spots: 15, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top' },
+  { id: '3', name: '上海', englishName: 'Shanghai', continent: '中国', x: 84.8, y: 32.5, image: 'https://picsum.photos/id/122/400/300', routes: 3, spots: 83, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
+  { id: '4', name: '南京', englishName: 'Nanjing', continent: '中国', x: 82.5, y: 31.8, image: 'https://picsum.photos/id/315/400/300', routes: 3, spots: 71, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'left' },
+  { id: '5', name: '西安', englishName: 'Xi\'an', continent: '中国', x: 80.25, y: 30.94, image: 'https://picsum.photos/id/292/400/300', routes: 3, spots: 66, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'left' },
+  { id: '6', name: '东京', englishName: 'Tokyo', continent: '亚洲其他', x: 88.80, y: 30.16, image: 'https://picsum.photos/id/274/400/300', routes: 3, spots: 120, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
+  { id: '7', name: '巴黎', englishName: 'Paris', continent: '欧洲', x: 50.63, y: 22.83, image: 'https://picsum.photos/id/192/400/300', routes: 3, spots: 90, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'bottom' },
+  { id: '8', name: '伦敦', englishName: 'London', continent: '欧洲', x: 49.3, y: 21.0, image: 'https://picsum.photos/id/246/400/300', routes: 3, spots: 140, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top' },
+  { id: '9', name: '纽约', englishName: 'New York', continent: '北美洲', x: 29.44, y: 27.38, image: 'https://picsum.photos/id/373/400/300', routes: 3, spots: 110, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'top' },
+  { id: '10', name: '悉尼', englishName: 'Sydney', continent: '大洋洲', x: 92.00, y: 68.83, image: 'https://picsum.photos/id/214/400/300', routes: 3, spots: 85, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
+  { id: '11', name: '里约热内卢', englishName: 'Rio', continent: '南美洲', x: 38.00, y: 62.72, image: 'https://picsum.photos/id/111/400/300', routes: 3, spots: 50, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
+  { id: '12', name: '开罗', englishName: 'Cairo', continent: '非洲', x: 58.66, y: 33.33, image: 'https://picsum.photos/id/230/400/300', routes: 3, spots: 60, completed: 0, status: 'unlit', completedRouteIndices: [], labelPosition: 'right' },
 ];
 
 export const CONTINENTS_ORDER = ['中国', '亚洲其他', '欧洲', '非洲', '北美洲', '南美洲', '大洋洲'];
@@ -43,3 +43,54 @@ export const CITIES_BY_CONTINENT = CITIES.reduce((acc, city) => {
   acc[city.continent].push(city);
   return acc;
 }, {} as Record<string, typeof CITIES>);
+
+export interface RouteDetailConfig {
+  title: string;
+  distance: string;
+  duration: string;
+  calories: string;
+  rating: string;
+  spots: string;
+  intro: string;
+}
+
+export const getRouteData = (cityId: string, routeIndex: number): RouteDetailConfig => {
+  const city = CITIES.find(c => c.id === cityId);
+  const cityName = city?.name || '未知城市';
+  
+  const routeConfigs: Record<string, RouteDetailConfig[]> = {
+    '1': [ // 杭州
+      { title: '西湖断桥残雪', distance: '3.5', duration: '25:00', calories: '210', rating: '4.9', spots: '断桥 — 白堤 — 平湖秋月', intro: '清晨的西湖边，微风拂柳。这条路线带你沿着白堤，感受「水光潋滟晴方好」的千古诗意。' },
+      { title: '灵隐寻幽', distance: '4.2', duration: '40:00', calories: '320', rating: '4.8', spots: '灵隐寺 — 飞来峰 — 法喜寺', intro: '远离城市喧嚣，深入山林古刹。在古树参天中呼吸新鲜空气，让脚步和心灵一起放空。' },
+      { title: '钱江新城夜灯', distance: '5.0', duration: '35:00', calories: '350', rating: '4.7', spots: '市民中心 — 城市阳台 — 大剧院', intro: '夜晚的钱江新城灯火辉煌，沿着江堤奔跑，迎着江风，看现代都市的繁华与江水的灵动交织。' }
+    ],
+    '2': [ // 北京
+      { title: '故宫角楼掠影', distance: '4.0', duration: '30:00', calories: '260', rating: '5.0', spots: '神武门 — 角楼 — 景山前街', intro: '沿着紫禁城的红墙奔跑，在角楼的倒影中穿梭，感受数百年的历史厚重与现代活力的碰撞。' },
+      { title: '奥森无限绿意', distance: '10.0', duration: '60:00', calories: '650', rating: '4.9', spots: '南园门 — 仰山 — 奥运湖', intro: '北京跑者的圣地，万亩森林氧吧。四季变幻的风景，平坦且专业的塑胶跑道，让你尽情挥洒汗水。' }
+    ],
+    '7': [ // 巴黎
+      { title: '塞纳河畔夕阳', distance: '6.5', duration: '45:00', calories: '410', rating: '5.0', spots: '卢浮宫 — 新桥 — 奥赛博物馆', intro: '迎着塞纳河的微风，当夕阳的余晖洒在奥赛博物馆的钟楼上，这是属于巴黎独有的浪漫奔跑。' },
+      { title: '铁塔星光', distance: '3.0', duration: '20:00', calories: '180', rating: '4.8', spots: '战神广场 — 埃菲尔铁塔 — 夏佑宫', intro: '在闪烁的铁塔下起跑，穿过战神广场的草坪，感受这座光之城最核心的脉动。' }
+    ],
+    '8': [ // 伦敦
+      { title: '西区奇缘声影录', distance: '2.0', duration: '15:36', calories: '169', rating: '5.0', spots: '皇家歌剧院 — 考文特花园 — 沙夫茨伯里大街', intro: '在西区看一场精彩演出，是伦敦人最自然的生活方式。从莱西姆剧院出发，踏入音乐剧心脏-伦敦西区。这条路线，带你沉湎于伦敦的音乐与爱。' },
+      { title: '泰晤士河漫步', distance: '5.5', duration: '38:00', calories: '340', rating: '4.8', spots: '大本钟 — 伦敦眼 — 泰特现代美术馆', intro: '沿着泰晤士河南岸，穿梭于古典与现代建筑之间，感受这座城市的厚重与新生。' }
+    ]
+  };
+
+  const cityRoutes = routeConfigs[cityId];
+  if (cityRoutes && cityRoutes[routeIndex - 1]) {
+    return cityRoutes[routeIndex - 1];
+  }
+
+  // Generic fallback
+  return {
+    title: `${cityName}深度探索路线`,
+    distance: (2 + (routeIndex % 5)).toFixed(1),
+    duration: `${15 + (routeIndex % 5) * 10}:00`,
+    calories: `${150 + (routeIndex % 5) * 60}`,
+    rating: '4.5',
+    spots: `${cityName}地标A — ${cityName}地标B — ${cityName}地标C`,
+    intro: `通过这条路线，深入探索${cityName}的城市角落，感受独一无二的地域风情和人文景观。`
+  };
+};

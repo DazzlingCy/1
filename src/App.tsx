@@ -3,6 +3,7 @@ import { Compass, Trophy, Map as MapIcon, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import HomeTab from './components/HomeTab';
 import EventsTab from './components/EventsTab';
+import { CITIES } from './data/cities';
 import CitiesTab from './components/CitiesTab';
 import ProfileTab from './components/ProfileTab';
 import CityRoutesView from './components/CityRoutesView';
@@ -16,6 +17,12 @@ export default function App() {
   const [fullScreenPage, setFullScreenPage] = useState<{type: 'cityRoutes' | 'routeDetail' | 'runPlayback' | 'litRecords' | 'leaderboard', data?: any} | null>(null);
   const [completedChapters, setCompletedChapters] = useState<number[]>([]);
   const [targetFlight, setTargetFlight] = useState<{fromCityId: string, toCityId: string} | null>(null);
+  const [userStats, setUserStats] = useState({
+    completedCities: 3,
+    completedRoutes: 36,
+    totalDistance: 62.0,
+    totalTimeHours: 12.0
+  });
 
   const tabs = [
     { id: 'home', label: '首页', icon: Compass },
@@ -31,9 +38,9 @@ export default function App() {
       case 'events':
         return <EventsTab />;
       case 'cities':
-        return <CitiesTab />;
+        return <CitiesTab onCityClick={(city) => setFullScreenPage({ type: 'cityRoutes', data: city })} />;
       case 'profile':
-        return <ProfileTab />;
+        return <ProfileTab userStats={userStats} />;
       default:
         return <HomeTab />;
     }
@@ -100,7 +107,14 @@ export default function App() {
                  onExploreNext={(currentCityId) => {
                    import('./data/cities').then(({ CITIES }) => {
                      const currentIndex = CITIES.findIndex(c => c.id === currentCityId);
-                     const nextCity = CITIES[(currentIndex + 1) % CITIES.length];
+                     let nextIndex = (currentIndex + 1) % CITIES.length;
+                     while (CITIES[nextIndex].status === 'lit' && nextIndex !== currentIndex) {
+                       nextIndex = (nextIndex + 1) % CITIES.length;
+                     }
+                     const nextCity = CITIES[nextIndex];
+                     if (nextCity.status === 'unlit') {
+                       nextCity.status = 'in-progress';
+                     }
                      setTargetFlight({ fromCityId: currentCityId, toCityId: nextCity.id });
                      setFullScreenPage(null);
                      setActiveTab('home');
@@ -119,26 +133,56 @@ export default function App() {
                <RunPlaybackView 
                  {...fullScreenPage.data}
                  onExit={() => setFullScreenPage({ type: 'routeDetail', data: fullScreenPage.data })}
-                 onComplete={() => {
+                 onComplete={(stats) => {
+                   // Update user stats
+                   setUserStats(prev => ({
+                     ...prev,
+                     totalDistance: prev.totalDistance + stats.distance,
+                     totalTimeHours: prev.totalTimeHours + (stats.duration / 3600),
+                     // completedRoutes and completedCities could be updated later below if it's a new route
+                   }));
+
                    const { previousCityData, routeIndex } = fullScreenPage.data;
                    const currentCompleted = previousCityData.completedRouteIndices || [];
                    
                    if (!currentCompleted.includes(routeIndex)) {
                      previousCityData.completedRouteIndices = [...currentCompleted, routeIndex];
                      previousCityData.completed = Math.min(previousCityData.completed + 1, previousCityData.routes);
+                     
+                     // If this is a newly completed route, increment completedRoutes counter
+                     setUserStats(prev => ({ ...prev, completedRoutes: prev.completedRoutes + 1 }));
                    }
                    
                    if (previousCityData.completed === previousCityData.routes && previousCityData.status !== 'lit') {
                      previousCityData.status = 'lit';
                      previousCityData.justLit = true;
+                     // Increment completed cities counter
+                     setUserStats(prev => ({ ...prev, completedCities: prev.completedCities + 1 }));
+                     
+                     // Set the next unlit city to in-progress
+                     const nextUnlit = CITIES.find(c => c.status === 'unlit');
+                     if (nextUnlit) {
+                       nextUnlit.status = 'in-progress';
+                     }
                    }
 
                    setCompletedChapters(prev => {
                      const newChapters = [...prev];
+                     // Chapter 1: Complete 1 route
                      if (!newChapters.includes(1)) newChapters.push(1);
+                     // Chapter 2: Complete 1 city
                      if (previousCityData.status === 'lit' && !newChapters.includes(2)) {
                        newChapters.push(2);
                      }
+                     
+                     const litCount = CITIES.filter(c => c.status === 'lit').length;
+                     if (litCount >= 3) {
+                       if (!newChapters.includes(3)) newChapters.push(3);
+                     }
+                     if (litCount >= CITIES.length) {
+                       if (!newChapters.includes(4)) newChapters.push(4);
+                     }
+                     
                      return newChapters;
                    });
 

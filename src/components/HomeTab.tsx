@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, animate, AnimatePresence } from 'motion/react';
-import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity } from 'lucide-react';
+import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity, Plane } from 'lucide-react';
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
@@ -9,6 +9,47 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
   const [scale, setScale] = useState(1);
   const [showStoryPanel, setShowStoryPanel] = useState(false);
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  const [isTreadmillConnected, setIsTreadmillConnected] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const litCount = CITIES.filter(c => c.status === 'lit').length;
+  const inProgressCity = CITIES.find(c => c.status === 'in-progress');
+  
+  let currentChapterText = "第一章：第一道光（选择第一座城市，完成一条路线）";
+  let progressWidth = '5%';
+  
+  if (completedChapters.includes(4)) {
+    currentChapterText = "所有章节已完成（地球倒影已解锁）";
+    progressWidth = '100%';
+  } else if (completedChapters.includes(3)) {
+    currentChapterText = `第四章：最终的母星记忆（点亮所有城市 ${litCount}/${CITIES.length}）`;
+    progressWidth = `${(litCount / CITIES.length) * 100}%`;
+  } else if (completedChapters.includes(2)) {
+    currentChapterText = `第三章：世界光迹网络（点亮三座城市 ${litCount}/3）`;
+    progressWidth = `${(litCount / 3) * 100}%`;
+  } else if (completedChapters.includes(1)) {
+    currentChapterText = `第二章：城市唤醒者（点亮第一座城市）`;
+    if (inProgressCity) {
+      progressWidth = `${(inProgressCity.completed / inProgressCity.routes) * 100}%`;
+    } else {
+      progressWidth = '0%';
+    }
+  } else {
+    currentChapterText = "第一章：第一道光（选择第一座城市，完成一条路线）";
+    if (inProgressCity) {
+      progressWidth = `${(inProgressCity.completed / inProgressCity.routes) * 100}%`;
+    } else {
+      progressWidth = '0%';
+    }
+  }
+
+  const handleConnectTreadmill = () => {
+    setIsTreadmillConnected(true);
+    setToastMessage('跑步机连接功能已启用，设备已连接');
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -30,8 +71,8 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
              setScale(1.2);
 
              setTimeout(() => {
-               animate(x, endOffsetX, { type: 'spring', bounce: 0, duration: 1.5 });
-               animate(y, endOffsetY, { type: 'spring', bounce: 0, duration: 1.5 });
+               animate(x, endOffsetX, { type: 'spring', bounce: 0, duration: 3 });
+               animate(y, endOffsetY, { type: 'spring', bounce: 0, duration: 3 });
              }, 500);
 
             setTimeout(() => {
@@ -39,7 +80,7 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                 if (onFlightComplete) {
                     onFlightComplete();
                 }
-            }, 2100);
+            }, 3600);
         }
         return;
     }
@@ -201,6 +242,72 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
               </motion.div>
             );
           })}
+
+          {/* Flight Path Animation */}
+          {(() => {
+            if (!targetFlight) return null;
+            const fc = CITIES.find(c => c.id === targetFlight.fromCityId);
+            const tc = CITIES.find(c => c.id === targetFlight.toCityId);
+            if (!fc || !tc) return null;
+
+            const x1 = (fc.x / 100) * 1200;
+            const y1 = (fc.y / 100) * 800;
+            const x2 = (tc.x / 100) * 1200;
+            const y2 = (tc.y / 100) * 800;
+
+            const cx = (x1 + x2) / 2 + (y2 - y1) * 0.2;
+            const cy = (y1 + y2) / 2 - (x2 - x1) * 0.2;
+
+            const pathObj = `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+
+            return (
+              <div className="absolute inset-0 pointer-events-none z-30">
+                <svg className="absolute inset-0 w-full h-full overflow-visible">
+                  <motion.path 
+                     d={pathObj}
+                     fill="transparent"
+                     strokeDasharray="8 8"
+                     stroke="rgba(34,211,238, 0.6)"
+                     strokeWidth="3"
+                     strokeLinecap="round"
+                     initial={{ pathLength: 0 }}
+                     animate={{ pathLength: 1 }}
+                     transition={{ duration: 3, delay: 0.5, ease: "easeInOut" }}
+                   />
+                   <motion.path 
+                     d={pathObj}
+                     fill="transparent"
+                     stroke="rgba(251,191,36, 0.4)"
+                     strokeWidth="5"
+                     strokeLinecap="round"
+                     className="blur-[8px]"
+                     initial={{ pathLength: 0 }}
+                     animate={{ pathLength: 1 }}
+                     transition={{ duration: 3, delay: 0.5, ease: "easeInOut" }}
+                   />
+                </svg>
+                <div className="absolute top-0 left-0 w-full h-full"> 
+                   <motion.div
+                     className="absolute flex flex-col items-center justify-center text-white pointer-events-none"
+                     style={{ 
+                       top: 0, 
+                       left: 0,
+                       offsetPath: `path('${pathObj}')`,
+                       offsetRotate: "auto 45deg"
+                     }}
+                     initial={{ offsetDistance: "0%", opacity: 0 }}
+                     animate={{ offsetDistance: "100%", opacity: 1 }}
+                     transition={{ 
+                        opacity: { duration: 0.1, delay: 0.5 },
+                        offsetDistance: { duration: 3, delay: 0.5, ease: "easeInOut" } 
+                     }}
+                   >
+                     <Plane size={20} fill="white" className="text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ transform: 'translate(-50%, -50%)' }} />
+                   </motion.div>
+                </div>
+              </div>
+            );
+          })()}
         </motion.div>
       </div>
 
@@ -227,9 +334,19 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
 
         {/* Top Right Actions */}
         <div className="flex items-center gap-2 pointer-events-auto">
-          <button className="flex items-center bg-white/5 border border-white/10 px-3 py-2 rounded-xl backdrop-blur-md hover:bg-white/10 transition-colors shadow-lg">
-            <Activity className="text-cyan-400 mr-1.5" size={16} />
-            <span className="text-[10px] font-medium text-slate-100 uppercase tracking-widest">连接跑步机</span>
+          <button 
+            onClick={handleConnectTreadmill}
+            className={cn(
+              "flex items-center px-3 py-2 rounded-xl backdrop-blur-md transition-colors shadow-lg border",
+              isTreadmillConnected 
+                ? "bg-emerald-500/20 border-emerald-500/50 hover:bg-emerald-500/30" 
+                : "bg-white/5 border-white/10 hover:bg-white/10"
+            )}
+          >
+            <Activity className={cn("mr-1.5", isTreadmillConnected ? "text-emerald-400" : "text-cyan-400")} size={16} />
+            <span className={cn("text-[10px] font-medium uppercase tracking-widest", isTreadmillConnected ? "text-emerald-100" : "text-slate-100")}>
+              {isTreadmillConnected ? "跑步机已连接" : "连接跑步机"}
+            </span>
           </button>
         </div>
       </div>
@@ -267,7 +384,13 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
               <div>
                 <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-1.5">主线计划</p>
                 <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-1 drop-shadow-sm">点亮地球计划</h3>
-                <p className="text-xs text-slate-400 line-clamp-1">第一章：第一道光（选择第一座城市，完成一条路线）</p>
+                <p className="text-xs text-slate-400 line-clamp-1">{currentChapterText}</p>
+                {inProgressCity && (
+                  <div className="mt-2 text-[10px] text-cyan-400 font-mono flex items-center bg-cyan-500/10 w-fit px-2 py-1 rounded">
+                    <MapPin size={12} className="mr-1" />
+                    当前运动: {inProgressCity.name} ({inProgressCity.completed}/{inProgressCity.routes} 路线)
+                  </div>
+                )}
               </div>
               <button className="w-10 h-10 border border-white/10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors shrink-0">
                 <ChevronRight className="text-cyan-400" size={20} />
@@ -277,13 +400,12 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
            <div className="mt-5 flex items-center w-full bg-white/5 rounded-full h-1 overflow-hidden border border-white/5">
              <motion.div 
                initial={{ width: 0 }}
-               animate={{ width: '5%' }}
+               animate={{ width: progressWidth }}
                transition={{ duration: 1, delay: 0.5 }}
                className="h-full bg-cyan-400 relative"
              >
              </motion.div>
            </div>
-           <p className="text-[10px] text-slate-500 text-right mt-1.5 font-mono">第 1 首发光迹待唤醒</p>
         </div>
       </div>
 
@@ -470,41 +592,57 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
 
                 {/* Chapter 3 */}
                 <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(2) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(3) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : completedChapters.includes(2) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
                     03
                   </div>
-                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(2) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(2) ? '' : 'opacity-60'}`}>
+                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(3) ? 'border-[#2ecc71]/30' : completedChapters.includes(2) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(2) ? '' : 'opacity-60'}`}>
                      <div className="flex items-center justify-between mb-1">
-                        <h3 className={`${completedChapters.includes(2) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第三章：世界光迹网络</h3>
+                        <h3 className={`${completedChapters.includes(3) ? 'text-[#2ecc71]' : completedChapters.includes(2) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第三章：世界光迹网络</h3>
                         {!completedChapters.includes(2) && <Lock size={14} className="text-slate-500" />}
                      </div>
                      <p className="text-xs text-slate-500 mb-3 font-mono">从点到面的文明复苏</p>
                      <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
                        当你点亮多座城市后，系列任务将随之开启。唤醒“巴黎+伦敦+罗马”，解锁欧洲文明光带；点亮“东京+京都+首尔”，重构东亚城市光带。连点成线，复织世界的光迹网络。
                      </p>
-                     {completedChapters.includes(2) && (
+                     {completedChapters.includes(3) ? (
+                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
+                           <CheckCircle2 size={12} className="mr-1" />
+                           已完成: 区域光带解锁
+                        </div>
+                     ) : completedChapters.includes(2) ? (
                         <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
                            <Activity size={12} className="mr-1" />
                            进行中: 复织世界网络
                         </div>
-                     )}
+                     ) : null}
                   </div>
                 </div>
 
                 {/* Chapter 4 */}
                 <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-slate-800 text-slate-400 shrink-0 z-10 font-bold text-xs">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${completedChapters.includes(4) ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : completedChapters.includes(3) ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs`}>
                     04
                   </div>
-                  <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-white/5 rounded-2xl p-4 shadow-lg backdrop-blur-sm opacity-60">
+                  <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${completedChapters.includes(4) ? 'border-[#2ecc71]/30' : completedChapters.includes(3) ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${completedChapters.includes(3) ? '' : 'opacity-60'}`}>
                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-slate-300 font-bold">第四章：第100座城市</h3>
-                        <Lock size={14} className="text-slate-500" />
+                        <h3 className={`${completedChapters.includes(4) ? 'text-[#2ecc71]' : completedChapters.includes(3) ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第四章：最终的母星记忆</h3>
+                        {!completedChapters.includes(3) && <Lock size={14} className="text-slate-500" />}
                      </div>
-                     <p className="text-xs text-slate-500 mb-3 font-mono">终极的母星记忆</p>
-                     <p className="text-[11px] text-slate-400 leading-relaxed">
-                       持之以恒地探索，直到触及第100座城市的边缘。收集散落的最终碎片，获得至高无上的回归勋章。长路的尽头，是地球最完整的倒影。
+                     <p className="text-xs text-slate-500 mb-3 font-mono">第{CITIES.length}座城市</p>
+                     <p className="text-[11px] text-slate-400 leading-relaxed mb-3">
+                       持之以恒地探索，直到触及所有的边缘。收集散落的最终碎片，获得至高无上的回归勋章。长路的尽头，是地球最完整的倒影。
                      </p>
+                     {completedChapters.includes(4) ? (
+                        <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono">
+                           <CheckCircle2 size={12} className="mr-1" />
+                           已完成: 地球倒影
+                        </div>
+                     ) : completedChapters.includes(3) ? (
+                        <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono">
+                           <Activity size={12} className="mr-1" />
+                           进行中: 漫长的巡礼
+                        </div>
+                     ) : null}
                   </div>
                 </div>
 
@@ -519,6 +657,20 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                  开始探索
                </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-20 left-1/2 -translate-x-1/2 z-50 bg-emerald-500/90 text-white px-4 py-2 rounded-full shadow-lg backdrop-blur-md text-xs font-medium whitespace-nowrap"
+          >
+            {toastMessage}
           </motion.div>
         )}
       </AnimatePresence>

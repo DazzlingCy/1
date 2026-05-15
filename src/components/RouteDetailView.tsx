@@ -1,4 +1,5 @@
 import { Play, ChevronRight, MessageSquare } from 'lucide-react';
+import { getRouteData } from '../data/cities';
 
 interface RouteDetailViewProps {
   cityId: string;
@@ -8,7 +9,9 @@ interface RouteDetailViewProps {
   onStart: () => void;
 }
 
-export default function RouteDetailView({ routeIndex, image, onBack, onStart }: RouteDetailViewProps) {
+export default function RouteDetailView({ cityId, routeIndex, image, onBack, onStart }: RouteDetailViewProps) {
+  const routeData = getRouteData(cityId, routeIndex);
+
   return (
     <div className="w-full h-full bg-[#f4f6f8] text-slate-800 font-sans relative flex flex-col hide-scrollbar">
       {/* Background Image Header */}
@@ -28,7 +31,7 @@ export default function RouteDetailView({ routeIndex, image, onBack, onStart }: 
 
         {/* Info overlay */}
         <div className="absolute bottom-16 left-6 right-6 text-white drop-shadow-md">
-          <h1 className="text-2xl font-bold mb-3 tracking-wide drop-shadow-lg">路线{routeIndex}：西区奇缘声影录</h1>
+          <h1 className="text-2xl font-bold mb-3 tracking-wide drop-shadow-lg">路线{routeIndex}：{routeData.title}</h1>
           <div className="flex items-center text-sm font-medium">
             <div className="flex -space-x-2 mr-3">
               {[1, 2, 3].map((i) => (
@@ -51,7 +54,7 @@ export default function RouteDetailView({ routeIndex, image, onBack, onStart }: 
         {/* Stats Row */}
         <div className="flex justify-between items-center px-8 py-8 border-b border-slate-100">
           <div className="flex flex-col items-center">
-            <span className="text-2xl font-bold text-slate-900 mb-1">2</span>
+            <span className="text-2xl font-bold text-slate-900 mb-1">{routeData.distance}</span>
             <span className="text-[10px] text-slate-500 flex flex-col items-center">
               <span>预计里程</span>
               <span>(km)</span>
@@ -59,7 +62,7 @@ export default function RouteDetailView({ routeIndex, image, onBack, onStart }: 
           </div>
           <div className="w-px h-8 bg-slate-200" />
           <div className="flex flex-col items-center">
-            <span className="text-2xl font-bold text-slate-900 mb-1">15:36</span>
+            <span className="text-2xl font-bold text-slate-900 mb-1">{routeData.duration}</span>
             <span className="text-[10px] text-slate-500 flex flex-col items-center">
               <span>预计时长</span>
               <span>(min)</span>
@@ -67,7 +70,7 @@ export default function RouteDetailView({ routeIndex, image, onBack, onStart }: 
           </div>
           <div className="w-px h-8 bg-slate-200" />
           <div className="flex flex-col items-center">
-            <span className="text-2xl font-bold text-slate-900 mb-1">169</span>
+            <span className="text-2xl font-bold text-slate-900 mb-1">{routeData.calories}</span>
             <span className="text-[10px] text-slate-500 flex flex-col items-center">
               <span>预计消耗</span>
               <span>(kcal)</span>
@@ -75,7 +78,7 @@ export default function RouteDetailView({ routeIndex, image, onBack, onStart }: 
           </div>
           <div className="w-px h-8 bg-slate-200" />
           <div className="flex flex-col items-center">
-            <span className="text-2xl font-bold text-orange-500 mb-1">5.0</span>
+            <span className="text-2xl font-bold text-orange-500 mb-1">{routeData.rating}</span>
             <span className="text-[10px] text-slate-500 flex flex-col items-center">
               <span>路线评分</span>
               <span>(分)</span>
@@ -114,7 +117,7 @@ export default function RouteDetailView({ routeIndex, image, onBack, onStart }: 
                <span className="text-sm font-bold text-emerald-800">路线景点</span>
              </div>
              <p className="text-sm text-slate-600 font-medium leading-relaxed">
-               皇家歌剧院 — 考文特花园 — 沙夫茨伯里大街
+               {routeData.spots}
              </p>
           </div>
 
@@ -124,7 +127,7 @@ export default function RouteDetailView({ routeIndex, image, onBack, onStart }: 
                <span className="text-sm font-bold text-emerald-800">路线简介</span>
              </div>
              <p className="text-sm text-slate-500 leading-relaxed">
-               在西区看一场精彩演出，是伦敦人最自然的生活方式。从莱西姆剧院出发，踏入音乐剧心脏-伦敦西区。这条路线，带你沉湎于伦敦的音乐与爱。
+               {routeData.intro}
              </p>
           </div>
 

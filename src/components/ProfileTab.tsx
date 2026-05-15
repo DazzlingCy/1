@@ -1,12 +1,19 @@
 import { Settings, ChevronRight, Mail, SquarePen, Medal, Map as MapIcon, MonitorSmartphone, Wallet, HeadphonesIcon, FileText, BookOpen, ClipboardList } from 'lucide-react';
 import { motion } from 'motion/react';
 
-export default function ProfileTab() {
+interface UserStats {
+  completedCities: number;
+  completedRoutes: number;
+  totalDistance: number;
+  totalTimeHours: number;
+}
+
+export default function ProfileTab({ userStats }: { userStats: UserStats }) {
   const stats = [
-    { label: '完成城市', value: '3' },
-    { label: '完成路线', value: '36' },
-    { label: '运动里程', value: '62', unit: 'km' },
-    { label: '运动时长', value: '12', unit: 'h' },
+    { label: '完成城市', value: userStats.completedCities.toString() },
+    { label: '完成路线', value: userStats.completedRoutes.toString() },
+    { label: '运动里程', value: userStats.totalDistance.toFixed(1), unit: 'km' },
+    { label: '运动时长', value: userStats.totalTimeHours.toFixed(1), unit: 'h' },
   ];
 
   const menuItems = [

@@ -7,7 +7,7 @@ interface RunPlaybackViewProps {
   routeIndex: number;
   image: string;
   onExit: () => void;
-  onComplete: () => void;
+  onComplete: (stats: { distance: number, duration: number, calories: number }) => void;
 }
 
 export default function RunPlaybackView({ cityId, routeIndex, image, onExit, onComplete }: RunPlaybackViewProps) {
@@ -169,7 +169,7 @@ export default function RunPlaybackView({ cityId, routeIndex, image, onExit, onC
                  </p>
 
                  <button 
-                   onClick={onComplete}
+                   onClick={() => onComplete({ distance, duration: time, calories: Math.floor(distance * 65) })}
                    className="w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.3)]"
                  >
                    收下光迹碎片
