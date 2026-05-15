@@ -7,9 +7,10 @@ interface CityRoutesViewProps {
   city: CityData;
   onBack: () => void;
   onRouteClick: (routeIndex: number) => void;
+  onExploreNext?: (currentCityId: string) => void;
 }
 
-export default function CityRoutesView({ city, onBack, onRouteClick }: CityRoutesViewProps) {
+export default function CityRoutesView({ city, onBack, onRouteClick, onExploreNext }: CityRoutesViewProps) {
   const [showLitModal, setShowLitModal] = useState(false);
 
   useEffect(() => {
@@ -21,7 +22,11 @@ export default function CityRoutesView({ city, onBack, onRouteClick }: CityRoute
   const handleCloseLitModal = () => {
     setShowLitModal(false);
     city.justLit = false;
-    onBack();
+    if (onExploreNext) {
+      onExploreNext(city.id);
+    } else {
+      onBack();
+    }
   };
 
   return (

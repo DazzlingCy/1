@@ -15,6 +15,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [fullScreenPage, setFullScreenPage] = useState<{type: 'cityRoutes' | 'routeDetail' | 'runPlayback' | 'litRecords' | 'leaderboard', data?: any} | null>(null);
   const [completedChapters, setCompletedChapters] = useState<number[]>([]);
+  const [targetFlight, setTargetFlight] = useState<{fromCityId: string, toCityId: string} | null>(null);
 
   const tabs = [
     { id: 'home', label: '首页', icon: Compass },
@@ -26,7 +27,7 @@ export default function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab onNavigate={(type, data) => setFullScreenPage({ type, data })} completedChapters={completedChapters} />;
+        return <HomeTab onNavigate={(type, data) => setFullScreenPage({ type, data })} completedChapters={completedChapters} targetFlight={targetFlight} onFlightComplete={() => setTargetFlight(null)} />;
       case 'events':
         return <EventsTab />;
       case 'cities':
@@ -96,6 +97,15 @@ export default function App() {
                    type: 'routeDetail', 
                    data: { cityId: fullScreenPage.data.id, routeIndex, image: fullScreenPage.data.image, previousCityData: fullScreenPage.data } 
                  })} 
+                 onExploreNext={(currentCityId) => {
+                   import('./data/cities').then(({ CITIES }) => {
+                     const currentIndex = CITIES.findIndex(c => c.id === currentCityId);
+                     const nextCity = CITIES[(currentIndex + 1) % CITIES.length];
+                     setTargetFlight({ fromCityId: currentCityId, toCityId: nextCity.id });
+                     setFullScreenPage(null);
+                     setActiveTab('home');
+                   });
+                 }}
                />
             )}
             {fullScreenPage.type === 'routeDetail' && (

@@ -4,7 +4,7 @@ import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milesto
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
-export default function HomeTab({ onNavigate, completedChapters = [] }: { onNavigate?: (type: string, data: any) => void; completedChapters?: number[] }) {
+export default function HomeTab({ onNavigate, completedChapters = [], targetFlight, onFlightComplete }: { onNavigate?: (type: string, data: any) => void; completedChapters?: number[]; targetFlight?: {fromCityId: string, toCityId: string} | null; onFlightComplete?: () => void; }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [showStoryPanel, setShowStoryPanel] = useState(false);
@@ -14,8 +14,39 @@ export default function HomeTab({ onNavigate, completedChapters = [] }: { onNavi
   const y = useMotionValue(0);
 
   useEffect(() => {
-    // Focus on the in-progress city on initial load
+    if (targetFlight) {
+        const fromCity = CITIES.find(c => c.id === targetFlight.fromCityId);
+        const toCity = CITIES.find(c => c.id === targetFlight.toCityId);
+        if (fromCity && toCity) {
+            const mapWidth = 1200;
+            const mapHeight = 800;
+            const startOffsetX = (0.5 - fromCity.x / 100) * mapWidth;
+            const startOffsetY = (0.5 - fromCity.y / 100) * mapHeight;
+            const endOffsetX = (0.5 - toCity.x / 100) * mapWidth;
+            const endOffsetY = (0.5 - toCity.y / 100) * mapHeight;
+
+             x.set(startOffsetX);
+             y.set(startOffsetY);
+             setScale(1.2);
+
+             setTimeout(() => {
+               animate(x, endOffsetX, { type: 'spring', bounce: 0, duration: 1.5 });
+               animate(y, endOffsetY, { type: 'spring', bounce: 0, duration: 1.5 });
+             }, 500);
+
+            setTimeout(() => {
+                setSelectedCity(toCity);
+                if (onFlightComplete) {
+                    onFlightComplete();
+                }
+            }, 2100);
+        }
+        return;
+    }
+
+    // Focus on the in-progress city on initial load if no target flight
     const inProgressCity = CITIES.find(c => c.status === 'in-progress') || CITIES[0];
+
     const mapWidth = 1200;
     const mapHeight = 800;
     const offsetX = (0.5 - inProgressCity.x / 100) * mapWidth;
@@ -24,7 +55,7 @@ export default function HomeTab({ onNavigate, completedChapters = [] }: { onNavi
     x.set(offsetX);
     y.set(offsetY);
     setScale(1);
-  }, [x, y]);
+  }, [x, y, targetFlight, onFlightComplete]);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.5, 3));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.5, 0.5));
