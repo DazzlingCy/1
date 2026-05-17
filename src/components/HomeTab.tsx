@@ -150,11 +150,15 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
   const handleStartExplore = () => {
     setShowStoryPanel(false);
     
-    // Pick 3 available cities (not lit, not upcoming)
-    const available = CITIES.filter(c => c.status !== 'lit' && c.status !== 'upcoming');
-    const shuffled = [...available].sort(() => 0.5 - Math.random());
-    setSelectableCities(shuffled.slice(0, 3));
-    setShowCitySelection(true);
+    if (inProgressCity) {
+      setSelectedCity(inProgressCity);
+    } else {
+      // Pick 3 available cities (not lit, not upcoming)
+      const available = CITIES.filter(c => c.status !== 'lit' && c.status !== 'upcoming');
+      const shuffled = [...available].sort(() => 0.5 - Math.random());
+      setSelectableCities(shuffled.slice(0, 3));
+      setShowCitySelection(true);
+    }
   };
 
   const handleCitySelect = (city: CityData) => {
@@ -584,8 +588,16 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
               </div>
 
               {!litCityIds.length ? (
-                <div className="w-full py-16 bg-[#d9d9d9] rounded flex items-center justify-center text-black mb-6">
-                  <p className="text-lg font-medium tracking-widest">一段开启任务前的引导文案</p>
+                <div className="w-full py-12 px-6 bg-slate-900/50 border border-slate-700/50 rounded-2xl flex flex-col items-center justify-center text-center mb-6 shadow-inner relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent"></div>
+                  <Compass size={32} className="text-cyan-500 animate-pulse mb-4 relative z-10" />
+                  <h3 className="text-lg font-bold text-slate-200 tracking-wider mb-2 relative z-10">母星网络尚未连接</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed mb-4 relative z-10">
+                    地球的记忆仍在一片暗淡之中。<br className="hidden sm:block" />您的奔跑，是重启这些城市坐标的唯一能源。
+                  </p>
+                  <div className="text-xs font-mono text-cyan-500/80 bg-cyan-950/30 px-3 py-1.5 rounded relative z-10">
+                    等待接收探索者指令...
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
@@ -636,7 +648,7 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                  onClick={handleStartExplore}
                  className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.3)]"
                >
-                 {litCityIds.length === 0 ? "开始探索" : "继续探索"}
+                 {litCityIds.length === 0 ? "开始探索" : inProgressCity ? "继续探索" : "选择下一城"}
                </button>
             </div>
           </motion.div>
