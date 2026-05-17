@@ -168,12 +168,12 @@ export default function RunPlaybackView({ cityId, routeIndex, image, onExit, onC
                    <span className="text-2xl text-cyan-500/30 absolute -bottom-4 right-0">"</span>
                  </p>
 
-                 <button 
-                   onClick={() => onComplete({ distance, duration: time, calories: Math.floor(distance * 65) })}
-                   className="w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.3)]"
-                 >
-                   收下光迹碎片
-                 </button>
+                   <button 
+                     onClick={() => onComplete({ distance, duration: time, calories: Math.floor(distance * 65) })}
+                     className="w-full py-3.5 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                   >
+                     收下光迹值
+                   </button>
               </motion.div>
            </motion.div>
         )}

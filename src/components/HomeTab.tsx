@@ -4,38 +4,53 @@ import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milesto
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
-export default function HomeTab({ onNavigate, completedChapters = [], targetFlight, onFlightComplete }: { onNavigate?: (type: string, data: any) => void; completedChapters?: number[]; targetFlight?: {fromCityId: string, toCityId: string} | null; onFlightComplete?: () => void; }) {
+export default function HomeTab({ onNavigate, completedChapters = [], targetFlight, onFlightComplete, pendingSelectionFrom, onCitySelected, litCityIds = [] }: { onNavigate?: (type: string, data: any) => void; completedChapters?: number[]; targetFlight?: {fromCityId: string, toCityId: string} | null; onFlightComplete?: () => void; pendingSelectionFrom?: string | null; onCitySelected?: (cityId: string) => void; litCityIds?: string[]; }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [showStoryPanel, setShowStoryPanel] = useState(false);
+  const [showCitySelection, setShowCitySelection] = useState(false);
+  const [selectableCities, setSelectableCities] = useState<CityData[]>([]);
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [isTreadmillConnected, setIsTreadmillConnected] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (pendingSelectionFrom) {
+      const available = CITIES.filter(c => c.status !== 'lit' && c.status !== 'upcoming' && c.id !== pendingSelectionFrom);
+      const shuffled = [...available].sort(() => 0.5 - Math.random());
+      setSelectableCities(shuffled.slice(0, 3));
+      setShowCitySelection(true);
+    }
+  }, [pendingSelectionFrom]);
+
   const litCount = CITIES.filter(c => c.status === 'lit').length;
   const inProgressCity = CITIES.find(c => c.status === 'in-progress');
   
-  let currentChapterText = "第一城：杭州，记忆唤醒的起点";
-  let progressWidth = '5%';
-  
-  if (completedChapters.includes(2)) {
-    // Determine the progress width based on lit count (out of all cities potentially)
-    progressWidth = `${(litCount / CITIES.length) * 100}%`;
-  }
-  
   const numMap = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
 
-  if (inProgressCity) {
-    const cityIndex = CITIES.findIndex(c => c.id === inProgressCity.id);
-    const numStr = numMap[cityIndex] || (cityIndex + 1).toString();
+  let currentChapterText = "点亮地球计划尚未开启";
+  let progressWidth = '0%';
+  
+  if (litCityIds.length === 0) {
+    currentChapterText = "未知状态：点击进入并开启计划";
+    progressWidth = '0%';
+  } else if (inProgressCity) {
+    const cityIndexInSequence = litCityIds.indexOf(inProgressCity.id);
+    const numStr = numMap[cityIndexInSequence] || (cityIndexInSequence + 1).toString();
     currentChapterText = `第${numStr}城：${inProgressCity.name}，${inProgressCity.description}`;
-    
-    // Calculate progress as a percentage of overall completion + current city progress
-    // If not using chapters anymore, maybe just progress of current city
     progressWidth = `${(inProgressCity.completed / inProgressCity.routes) * 100}%`;
-  } else if (litCount === CITIES.length) {
+  } else if (litCount > 0 && litCount === CITIES.length) {
     currentChapterText = "所有城市已点亮（地球倒影已解锁）";
     progressWidth = '100%';
+  } else {
+     // If everything is lit but some are still in progress? 
+     // Or if we just finished one and haven't picked next
+     const lastLitId = litCityIds[litCityIds.length - 1];
+     const lastLitCity = CITIES.find(c => c.id === lastLitId);
+      if (lastLitCity) {
+        currentChapterText = `已点亮：${lastLitCity.name}，请开启下一站`;
+        progressWidth = '100%';
+      }
   }
 
   const handleConnectTreadmill = () => {
@@ -134,23 +149,46 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
 
   const handleStartExplore = () => {
     setShowStoryPanel(false);
-    const inProgressCity = CITIES.find(c => c.status === 'in-progress') || CITIES[0];
     
-    // Default map is 1200x800
-    const mapWidth = 1200;
-    const mapHeight = 800;
+    // Pick 3 available cities (not lit, not upcoming)
+    const available = CITIES.filter(c => c.status !== 'lit' && c.status !== 'upcoming');
+    const shuffled = [...available].sort(() => 0.5 - Math.random());
+    setSelectableCities(shuffled.slice(0, 3));
+    setShowCitySelection(true);
+  };
+
+  const handleCitySelect = (city: CityData) => {
+    setShowCitySelection(false);
     
-    // Find offset
-    const offsetX = (0.5 - inProgressCity.x / 100) * mapWidth;
-    const offsetY = (0.5 - inProgressCity.y / 100) * mapHeight;
+    // Set status to in-progress for selected city
+    CITIES.forEach(c => {
+      if (c.status === 'in-progress') {
+        c.status = 'unlit';
+      }
+    });
+    city.status = 'in-progress';
+
+    if (onCitySelected) {
+      onCitySelected(city.id);
+    }
     
-    animate(x, offsetX, { type: 'spring', bounce: 0, duration: 0.8 });
-    animate(y, offsetY, { type: 'spring', bounce: 0, duration: 0.8 });
-    setScale(1);
-    
-    setTimeout(() => {
-      setSelectedCity(inProgressCity);
-    }, 800);
+    if (!pendingSelectionFrom) {
+      // Default map is 1200x800
+      const mapWidth = 1200;
+      const mapHeight = 800;
+      
+      // Find offset
+      const offsetX = (0.5 - city.x / 100) * mapWidth;
+      const offsetY = (0.5 - city.y / 100) * mapHeight;
+      
+      animate(x, offsetX, { type: 'spring', bounce: 0, duration: 0.8 });
+      animate(y, offsetY, { type: 'spring', bounce: 0, duration: 0.8 });
+      setScale(1);
+      
+      setTimeout(() => {
+        setSelectedCity(city);
+      }, 800);
+    }
   };
 
   const handleCityClick = (city: CityData) => {
@@ -196,16 +234,20 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
           {CITIES.map((city) => {
             const statusConfig = {
               'unlit': {
-                dot: 'bg-slate-700/60 ring-slate-800/30 shadow-none',
-                text: 'text-slate-500/80 bg-black/40',
+                dot: 'bg-[#218F8D] ring-[#218F8D]/30 shadow-[0_0_15px_#218F8D]',
+                text: 'text-[#218F8D] bg-black/60 border border-[#218F8D]/30',
               },
               'in-progress': {
                 dot: 'bg-amber-400 ring-amber-400/30 shadow-[0_0_15px_rgba(251,191,36,0.8)]',
                 text: 'text-amber-100 bg-amber-950/80 border border-amber-500/30',
               },
               'lit': {
-                dot: 'bg-cyan-400 ring-cyan-400/30 shadow-[0_0_15px_cyan]',
-                text: 'text-cyan-50 bg-black/60 border border-cyan-500/30',
+                dot: 'bg-amber-400 ring-amber-400/30 shadow-[0_0_15px_rgba(251,191,36,0.8)]',
+                text: 'text-amber-100 bg-amber-950/80 border border-amber-500/30',
+              },
+              'upcoming': {
+                dot: 'bg-slate-700/60 ring-slate-800/30 shadow-none',
+                text: 'text-slate-500/80 bg-black/40',
               }
             };
             const config = statusConfig[city.status];
@@ -319,9 +361,9 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
             />
           </div>
           <div>
-            <div className="text-xs font-semibold tracking-wide text-slate-100">光迹探索者</div>
+            <div className="text-xs font-semibold tracking-wide text-slate-100">木小六</div>
             <div className="flex items-center text-[10px] text-cyan-300">
-              <span className="mr-1">光迹碎片:</span>
+              <span className="mr-1">光迹值:</span>
               <span className="font-mono font-bold">120</span>
             </div>
           </div>
@@ -377,7 +419,6 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
            <div className="absolute -bottom-10 right-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
            <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest mb-1.5">主线计划</p>
                 <h3 className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 mb-1 drop-shadow-sm">点亮地球计划</h3>
                 <p className="text-xs text-slate-400 line-clamp-1">{currentChapterText}</p>
                 {inProgressCity && (
@@ -421,9 +462,11 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
               className="w-full max-w-sm bg-slate-900/90 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
               onClick={(e) => {
                  e.stopPropagation();
-                 setSelectedCity(null);
-                 if (onNavigate) {
-                   onNavigate('cityRoutes', selectedCity);
+                 if (selectedCity.status !== 'upcoming') {
+                   setSelectedCity(null);
+                   if (onNavigate) {
+                     onNavigate('cityRoutes', selectedCity);
+                   }
                  }
               }}
             >
@@ -446,48 +489,57 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
               </div>
               
               <div className="p-6 pt-2">
-                 <div className="flex justify-between text-sm mb-6 bg-white/5 rounded-xl p-4 border border-white/5">
-                   <div className="flex flex-col items-center">
-                     <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.routes}</span>
-                     <span className="text-[10px] text-slate-500 uppercase tracking-widest">路线</span>
+                 {selectedCity.status === 'upcoming' ? (
+                   <div className="flex flex-col items-center justify-center py-8">
+                     <Lock size={32} className="text-slate-500 mb-4" />
+                     <p className="text-slate-400 font-medium">即将上线时间: 2026年下半年</p>
                    </div>
-                   <div className="w-px bg-white/10" />
-                   <div className="flex flex-col items-center">
-                     <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.spots}</span>
-                     <span className="text-[10px] text-slate-500 uppercase tracking-widest">景点</span>
-                   </div>
-                   <div className="w-px bg-white/10" />
-                   <div className="flex flex-col items-center">
-                     <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.status === 'lit' ? '100%' : `${Math.round((selectedCity.completed / selectedCity.routes) * 100)}%`}</span>
-                     <span className="text-[10px] text-slate-500 uppercase tracking-widest">完成度</span>
-                   </div>
-                 </div>
+                 ) : (
+                   <>
+                     <div className="flex justify-between text-sm mb-6 bg-white/5 rounded-xl p-4 border border-white/5">
+                       <div className="flex flex-col items-center">
+                         <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.routes}</span>
+                         <span className="text-[10px] text-slate-500 uppercase tracking-widest">路线</span>
+                       </div>
+                       <div className="w-px bg-white/10" />
+                       <div className="flex flex-col items-center">
+                         <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.spots}</span>
+                         <span className="text-[10px] text-slate-500 uppercase tracking-widest">景点</span>
+                       </div>
+                       <div className="w-px bg-white/10" />
+                       <div className="flex flex-col items-center">
+                         <span className="text-2xl font-bold text-slate-100 mb-1">{selectedCity.status === 'lit' ? '100%' : `${Math.round((selectedCity.completed / selectedCity.routes) * 100)}%`}</span>
+                         <span className="text-[10px] text-slate-500 uppercase tracking-widest">完成度</span>
+                       </div>
+                     </div>
 
-                 <div className="mb-6">
-                    <div className="flex justify-between items-end mb-2">
-                       <span className="text-[10px] text-slate-400">唤醒进度</span>
-                       <span className="text-xs font-mono font-medium text-amber-500">{selectedCity.completed} / {selectedCity.routes}</span>
-                    </div>
-                    <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
-                       <div 
-                         className="h-full bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
-                         style={{ width: `${(selectedCity.completed / selectedCity.routes) * 100}%` }} 
-                       />
-                    </div>
-                 </div>
+                     <div className="mb-6">
+                        <div className="flex justify-between items-end mb-2">
+                           <span className="text-[10px] text-slate-400">唤醒进度</span>
+                           <span className="text-xs font-mono font-medium text-amber-500">{selectedCity.completed} / {selectedCity.routes}</span>
+                        </div>
+                        <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                           <div 
+                             className="h-full bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
+                             style={{ width: `${(selectedCity.completed / selectedCity.routes) * 100}%` }} 
+                           />
+                        </div>
+                     </div>
 
-                 <button 
-                   className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.2)]"
-                   onClick={(e) => {
-                     e.stopPropagation();
-                     setSelectedCity(null);
-                     if (onNavigate) {
-                       onNavigate('cityRoutes', selectedCity);
-                     }
-                   }}
-                 >
-                   进入这座城市
-                 </button>
+                     <button 
+                       className="w-full py-4 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         setSelectedCity(null);
+                         if (onNavigate) {
+                           onNavigate('cityRoutes', selectedCity);
+                         }
+                       }}
+                     >
+                       进入这座城市
+                     </button>
+                   </>
+                 )}
               </div>
             </motion.div>
           </motion.div>
@@ -531,43 +583,52 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                 </p>
               </div>
 
-              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
-                {CITIES.map((city, index) => {
-                  const numStr = numMap[index] || (index + 1).toString();
-                  const isLit = city.status === 'lit';
-                  const isInProgress = city.status === 'in-progress';
-                  const isLocked = city.status === 'unlit';
+              {!litCityIds.length ? (
+                <div className="w-full py-16 bg-[#d9d9d9] rounded flex items-center justify-center text-black mb-6">
+                  <p className="text-lg font-medium tracking-widest">一段开启任务前的引导文案</p>
+                </div>
+              ) : (
+                <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
+                  {litCityIds.map((cityId, index) => {
+                    const city = CITIES.find(c => c.id === cityId);
+                    if (!city) return null;
+                    
+                    const numStr = numMap[index] || (index + 1).toString();
+                    const isLit = city.status === 'lit';
+                    const isInProgress = city.status === 'in-progress';
+                    const isLocked = false;
 
-                  return (
-                    <div key={city.id} className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group ${!isLocked ? 'is-active' : ''}`}>
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${isLit ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : isInProgress ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs relative`}>
-                        {String(index + 1).padStart(2, '0')}
+                    return (
+                      <div key={city.id} className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group ${!isLocked ? 'is-active' : ''}`}>
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${isLit ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : isInProgress ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs relative`}>
+                          {String(index + 1).padStart(2, '0')}
+                        </div>
+                        <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${isLit ? 'border-[#2ecc71]/30' : isInProgress ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${isLocked ? 'opacity-60' : ''}`}>
+                           <div className="flex items-center justify-between mb-1">
+                              <h3 className={`${isLit ? 'text-[#2ecc71]' : isInProgress ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第{numStr}城：{city.name}</h3>
+                              {isLocked && <Lock size={14} className="text-slate-500" />}
+                           </div>
+                           <p className="text-xs text-slate-400 mb-3 font-mono">{city.continent} · {city.englishName}</p>
+                           <p className={`text-[11px] leading-relaxed mb-3 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`}>
+                             {city.description}
+                           </p>
+                           {isLit ? (
+                              <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono w-fit">
+                                 <CheckCircle2 size={12} className="mr-1" />
+                                 已完成: 城市卡片已解锁
+                              </div>
+                           ) : isInProgress ? (
+                              <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono w-fit">
+                                 <Activity size={12} className="mr-1" />
+                                 进行中: 唤醒进度 {city.completed}/{city.routes}
+                              </div>
+                           ) : null}
+                        </div>
                       </div>
-                      <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${isLit ? 'border-[#2ecc71]/30' : isInProgress ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${isLocked ? 'opacity-60' : ''}`}>
-                         <div className="flex items-center justify-between mb-1">
-                            <h3 className={`${isLit ? 'text-[#2ecc71]' : isInProgress ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第{numStr}城：{city.name}</h3>
-                            {isLocked && <Lock size={14} className="text-slate-500" />}
-                         </div>
-                         <p className="text-xs text-slate-400 mb-3 font-mono">{city.continent} · {city.englishName}</p>
-                         <p className={`text-[11px] leading-relaxed mb-3 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`}>
-                           {city.description}
-                         </p>
-                         {isLit ? (
-                            <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono w-fit">
-                               <CheckCircle2 size={12} className="mr-1" />
-                               已完成: 城市卡片已解锁
-                            </div>
-                         ) : isInProgress ? (
-                            <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono w-fit">
-                               <Activity size={12} className="mr-1" />
-                               进行中: 唤醒进度 {city.completed}/{city.routes}
-                            </div>
-                         ) : null}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             
             <div className="p-4 bg-black/80 backdrop-blur-md border-t border-white/5 shrink-0">
@@ -575,9 +636,58 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                  onClick={handleStartExplore}
                  className="w-full py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold rounded-xl transition-colors tracking-wide shadow-[0_0_20px_rgba(34,211,238,0.3)]"
                >
-                 开始探索
+                 {litCityIds.length === 0 ? "开始探索" : "继续探索"}
                </button>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* City Selection Overlay */}
+      <AnimatePresence>
+        {showCitySelection && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[60] bg-black/80 flex flex-col items-center justify-center p-6 backdrop-blur-sm"
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-white mb-2">选择探索城市</h2>
+              <p className="text-slate-400 text-sm">选择一个城市，开启你的光迹唤醒之旅</p>
+            </div>
+            
+            <div className="w-full flex flex-col gap-4">
+              {selectableCities.map((city, idx) => (
+                <motion.div
+                  key={city.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-xl"
+                  onClick={() => handleCitySelect(city)}
+                >
+                  <div className="relative h-24">
+                    <img src={city.image} alt={city.name} className="absolute inset-0 w-full h-full object-cover opacity-60" referrerPolicy="no-referrer" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-between px-6">
+                      <div>
+                        <h3 className="text-xl font-bold text-white drop-shadow-md">{city.name}</h3>
+                        <p className="text-xs text-cyan-300 font-mono tracking-widest uppercase">{city.englishName}</p>
+                      </div>
+                      <ChevronRight className="text-white/50" />
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            
+            <button
+              className="mt-8 text-slate-400 text-sm hover:text-white"
+              onClick={() => setShowCitySelection(false)}
+            >
+              取消
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

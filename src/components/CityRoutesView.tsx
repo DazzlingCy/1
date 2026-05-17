@@ -15,6 +15,7 @@ interface CityRoutesViewProps {
 export default function CityRoutesView({ city, onBack, onRouteClick, onExploreNext }: CityRoutesViewProps) {
   const [showLitModal, setShowLitModal] = useState(false);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const [isLightingUp, setIsLightingUp] = useState(false);
   const [activeTab, setActiveTab] = useState(city.id === '1' ? '环西湖' : '精选推荐');
 
   const tabs = city.id === '1' 
@@ -184,9 +185,28 @@ export default function CityRoutesView({ city, onBack, onRouteClick, onExploreNe
 
                 <div 
                    className="relative w-64 h-[360px] [transform-style:preserve-3d] cursor-pointer transition-transform duration-700 hover:scale-105"
-                   onClick={() => setIsCardFlipped(true)}
+                   onClick={() => {
+                     if (isCardFlipped || isLightingUp) return;
+                     setIsLightingUp(true);
+                     setTimeout(() => {
+                       setIsLightingUp(false);
+                       setIsCardFlipped(true);
+                     }, 800);
+                   }}
                    style={{ transform: isCardFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
                 >
+                   <AnimatePresence>
+                     {isLightingUp && (
+                       <motion.div
+                         initial={{ opacity: 0, scale: 0.1 }}
+                         animate={{ opacity: [0, 1, 1, 0], scale: [0.1, 1.5, 3, 4] }}
+                         exit={{ opacity: 0 }}
+                         transition={{ duration: 0.8, times: [0, 0.4, 0.7, 1], ease: "easeOut" }}
+                         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-amber-400 mix-blend-screen blur-[30px] rounded-full z-50 pointer-events-none"
+                       />
+                     )}
+                   </AnimatePresence>
+
                    {/* Card Back */}
                    <div className="absolute inset-0 [backface-visibility:hidden] bg-slate-800 border-2 border-white/20 rounded-2xl shadow-2xl flex flex-col items-center justify-center">
                      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 rounded-2xl"></div>
