@@ -4,7 +4,7 @@ import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milesto
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
-export default function HomeTab({ onNavigate, completedChapters = [], targetFlight, onFlightComplete, pendingSelectionFrom, onCitySelected, litCityIds = [] }: { onNavigate?: (type: string, data: any) => void; completedChapters?: number[]; targetFlight?: {fromCityId: string, toCityId: string} | null; onFlightComplete?: () => void; pendingSelectionFrom?: string | null; onCitySelected?: (cityId: string) => void; litCityIds?: string[]; }) {
+export default function HomeTab({ onNavigate, completedChapters = [], targetFlight, onFlightComplete, pendingSelectionFrom, onCitySelected, litCityIds = [], userStats, setUserStats }: { onNavigate?: (type: string, data: any) => void; completedChapters?: number[]; targetFlight?: {fromCityId: string, toCityId: string} | null; onFlightComplete?: () => void; pendingSelectionFrom?: string | null; onCitySelected?: (cityId: string) => void; litCityIds?: string[]; userStats?: any; setUserStats?: any; }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   const [showStoryPanel, setShowStoryPanel] = useState(false);
@@ -13,6 +13,7 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
   const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
   const [isTreadmillConnected, setIsTreadmillConnected] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showSwitchConfirm, setShowSwitchConfirm] = useState(false);
 
   useEffect(() => {
     if (pendingSelectionFrom) {
@@ -384,7 +385,7 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
             <div className="text-xs font-semibold tracking-wide text-slate-100">木小六</div>
             <div className="flex items-center text-[10px] text-cyan-300">
               <span className="mr-1">光迹值:</span>
-              <span className="font-mono font-bold">120</span>
+              <span className="font-mono font-bold">{userStats?.lightValue || 120}</span>
             </div>
           </div>
         </div>
@@ -635,12 +636,23 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                             {String(index + 1).padStart(2, '0')}
                           </div>
                           <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${isLit ? 'border-[#2ecc71]/30' : isInProgress ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${isLocked ? 'opacity-60' : ''}`}>
-                             <div className="flex items-center justify-between mb-1">
-                                <h3 className={`${isLit ? 'text-[#2ecc71]' : isInProgress ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第{numStr}城：{city.name}</h3>
+                             <div className="flex items-start justify-between mb-1 gap-2">
+                                <div>
+                                  <h3 className={`${isLit ? 'text-[#2ecc71]' : isInProgress ? 'text-cyan-400' : 'text-slate-300'} font-bold text-lg`}>第{numStr}城：{city.name}</h3>
+                                  <p className="text-[13px] text-slate-400 mt-1 font-mono">{city.continent} · {city.englishName}</p>
+                                </div>
                                 {isLocked && <Lock size={14} className="text-slate-500" />}
+                                {isInProgress && (
+                                  <button onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowSwitchConfirm(true);
+                                  }} className="flex items-center gap-1.5 text-xs font-medium text-cyan-400/80 hover:text-cyan-300 bg-cyan-950/40 border border-cyan-500/20 hover:border-cyan-400/40 hover:bg-cyan-900/40 px-3 py-1 rounded-full transition-all shrink-0 shadow-[0_0_10px_rgba(34,211,238,0.05)]">
+                                    <RefreshCw size={12} />
+                                    切换
+                                  </button>
+                                )}
                              </div>
-                             <p className="text-xs text-slate-400 mb-3 font-mono">{city.continent} · {city.englishName}</p>
-                             <p className={`text-[11px] leading-relaxed mb-3 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`}>
+                             <p className={`text-[12px] leading-relaxed mb-4 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`}>
                                {city.description}
                              </p>
                              {isLit ? (
@@ -746,6 +758,64 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
             >
               取消
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Switch City Confirmation */}
+      <AnimatePresence>
+        {showSwitchConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[60] bg-black/80 flex flex-col items-center justify-center p-6 backdrop-blur-sm"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-slate-900 border border-white/10 p-6 rounded-2xl w-full max-w-xs text-center shadow-2xl"
+            >
+               <h3 className="text-xl font-bold text-white mb-3">切换城市</h3>
+               <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                 切换城市将消耗<span className="text-amber-400 font-bold mx-1">3点光迹值</span>。<br/>
+                 是否继续？
+               </p>
+               
+               <div className="flex gap-3">
+                 <button 
+                   onClick={() => setShowSwitchConfirm(false)}
+                   className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-colors font-medium border border-white/5"
+                 >
+                   取消
+                 </button>
+                 <button 
+                   onClick={() => {
+                      if (userStats && userStats.lightValue >= 3) {
+                        if (setUserStats) {
+                          setUserStats((prev: any) => ({ ...prev, lightValue: prev.lightValue - 3 }));
+                        }
+                        const available = CITIES.filter(c => c.status !== 'lit' && c.status !== 'upcoming');
+                        const shuffled = [...available].sort(() => 0.5 - Math.random());
+                        setSelectableCities(shuffled.slice(0, 3));
+                        setShowSwitchConfirm(false);
+                        setShowStoryPanel(false); // Close story panel as well right away
+                        setShowCitySelection(true);
+                        setToastMessage('已消耗3点光迹值重新选择城市');
+                        setTimeout(() => setToastMessage(null), 3000);
+                      } else {
+                        setShowSwitchConfirm(false);
+                        setToastMessage('光迹值不足 (需要3点)');
+                        setTimeout(() => setToastMessage(null), 3000);
+                      }
+                   }}
+                   className="flex-1 py-3 bg-cyan-500 hover:bg-cyan-400 text-slate-900 rounded-xl transition-colors font-bold shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                 >
+                   确定
+                 </button>
+               </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

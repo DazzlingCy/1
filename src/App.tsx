@@ -36,7 +36,8 @@ export default function App() {
     completedCities: 3,
     completedRoutes: 36,
     totalDistance: 62.0,
-    totalTimeHours: 12.0
+    totalTimeHours: 12.0,
+    lightValue: 120
   });
 
   const tabs = [
@@ -50,6 +51,8 @@ export default function App() {
     switch (activeTab) {
       case 'home':
         return <HomeTab 
+          userStats={userStats}
+          setUserStats={setUserStats}
           onNavigate={(type, data) => setFullScreenPage({ type: type as any, data })} 
           completedChapters={completedChapters} 
           targetFlight={targetFlight} 
@@ -92,7 +95,7 @@ export default function App() {
       case 'profile':
         return <ProfileTab userStats={userStats} />;
       default:
-        return <HomeTab />;
+        return <HomeTab userStats={userStats} setUserStats={setUserStats} />;
     }
   };
 
@@ -187,7 +190,7 @@ export default function App() {
                      ...prev,
                      totalDistance: prev.totalDistance + stats.distance,
                      totalTimeHours: prev.totalTimeHours + (stats.duration / 3600),
-                     // completedRoutes and completedCities could be updated later below if it's a new route
+                     lightValue: (prev.lightValue || 0) + (stats.calories || Math.floor(stats.distance * 65))
                    }));
 
                    const { previousCityData, routeIndex } = fullScreenPage.data;
