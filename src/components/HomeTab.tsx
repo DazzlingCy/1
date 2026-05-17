@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, animate, AnimatePresence } from 'motion/react';
-import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity, Plane } from 'lucide-react';
+import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity, Plane, Compass } from 'lucide-react';
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 

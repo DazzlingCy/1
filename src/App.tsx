@@ -15,51 +15,18 @@ import LeaderboardView from './components/LeaderboardView';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
-  const [showIntro, setShowIntro] = useState(() => {
-    return localStorage.getItem('hasSeenIntro') !== 'true';
-  });
+  const [showIntro, setShowIntro] = useState(true);
   const [fullScreenPage, setFullScreenPage] = useState<{type: 'cityRoutes' | 'routeDetail' | 'runPlayback' | 'litRecords' | 'leaderboard', data?: any} | null>(null);
   const [litCityIds, setLitCityIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem('litCitySequence');
-    const sequence = saved ? JSON.parse(saved) : [];
-    
-    // Sync CITIES status with loaded sequence
-    if (sequence.length > 0) {
-      CITIES.forEach(c => {
-        if (sequence.includes(c.id)) {
-           // By default, if it's in the sequence but not the LAST one, 
-           // and we don't have deeper persistence, let's assume it was lit 
-           // if there's more than one city.
-           // However, to be more robust, we should check if it's the last one.
-           c.status = 'lit';
-           c.completed = c.routes; // Mock as completed
-        } else {
-           c.status = c.status === 'upcoming' ? 'upcoming' : 'unlit';
-        }
-      });
-      
-      const lastCityId = sequence[sequence.length - 1];
-      const lastCity = CITIES.find(c => c.id === lastCityId);
-      if (lastCity) {
-        // If it's the only city and it hasn't been marked as lit by user action yet,
-        // we keep it as in-progress.
-        // Actually, let's just make the last one in-progress unless it was explicitly lit.
-        lastCity.status = 'in-progress';
-        lastCity.completed = 0; // Reset for mock simplicity or keep if we had persistence
-      }
-    } else {
-      // If empty, ensure all are unlit (except upcoming)
-      CITIES.forEach(c => {
-        if (c.status !== 'upcoming') c.status = 'unlit';
-      });
-    }
-
-    return sequence;
+    // Always start fresh on load
+    CITIES.forEach(c => {
+      if (c.status !== 'upcoming') c.status = 'unlit';
+      c.completed = 0;
+      c.completedRouteIndices = [];
+      c.justLit = false;
+    });
+    return [];
   });
-
-  useEffect(() => {
-    localStorage.setItem('litCitySequence', JSON.stringify(litCityIds));
-  }, [litCityIds]);
 
   const [completedChapters, setCompletedChapters] = useState<number[]>([]);
   const [targetFlight, setTargetFlight] = useState<{fromCityId: string, toCityId: string} | null>(null);
@@ -107,9 +74,12 @@ export default function App() {
           onFlightComplete={() => {
           if (targetFlight) {
             const nextCity = CITIES.find(c => c.id === targetFlight.toCityId);
-            if (nextCity && nextCity.status === 'unlit') {
+            if (nextCity && (nextCity.status === 'unlit' || nextCity.status === 'in-progress')) {
               nextCity.status = 'in-progress';
-              setLitCityIds(prev => [...prev, nextCity.id]);
+              setLitCityIds(prev => {
+                if (prev.includes(nextCity.id)) return prev;
+                return [...prev, nextCity.id];
+              });
             }
           }
           setTargetFlight(null);
@@ -131,7 +101,6 @@ export default function App() {
         {showIntro && (
           <IntroScreen 
             onComplete={() => {
-              localStorage.setItem('hasSeenIntro', 'true');
               setShowIntro(false);
             }} 
           />
@@ -225,7 +194,7 @@ export default function App() {
                    
                    if (!currentCompleted.includes(routeIndex)) {
                      previousCityData.completedRouteIndices = [...currentCompleted, routeIndex];
-                     previousCityData.completed = Math.min(previousCityData.completed + 1, previousCityData.routes);
+                     previousCityData.completed = Math.min(previousCityData.completedRouteIndices.length, previousCityData.routes);
                      
                      // If this is a newly completed route, increment completedRoutes counter
                      setUserStats(prev => ({ ...prev, completedRoutes: prev.completedRoutes + 1 }));
