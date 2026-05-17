@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useMotionValue, animate, AnimatePresence } from 'motion/react';
-import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity, Plane, Compass } from 'lucide-react';
+import { Award, Zap, ChevronRight, X, CheckCircle2, Lock, MapPin, Route, Milestone, Activity, Plane, Compass, RefreshCw } from 'lucide-react';
 import { CITIES, CityData } from '../data/cities';
 import { cn } from '../lib/utils';
 
@@ -159,6 +159,22 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
       setSelectableCities(shuffled.slice(0, 3));
       setShowCitySelection(true);
     }
+  };
+
+  const handleShuffleCities = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    let available = CITIES.filter(c => c.status !== 'lit' && c.status !== 'upcoming');
+    if (pendingSelectionFrom) {
+      available = available.filter(c => c.id !== pendingSelectionFrom);
+    }
+    const currentIds = new Set(selectableCities.map(c => c.id));
+    let remaining = available.filter(c => !currentIds.has(c.id));
+    if (remaining.length < 3) {
+      remaining = [...available].sort(() => 0.5 - Math.random());
+    } else {
+      remaining = remaining.sort(() => 0.5 - Math.random());
+    }
+    setSelectableCities(remaining.slice(0, 3));
   };
 
   const handleCitySelect = (city: CityData) => {
@@ -601,43 +617,65 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
                 </div>
               ) : (
                 <div className="space-y-6 relative before:absolute before:inset-0 before:ml-[15px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-cyan-500 before:via-slate-700 before:to-slate-800">
-                  {litCityIds.map((cityId, index) => {
-                    const city = CITIES.find(c => c.id === cityId);
-                    if (!city) return null;
-                    
+                  {Array.from({ length: Math.min(litCityIds.length + 1, 12) }).map((_, index) => {
+                    const cityId = litCityIds[index];
                     const numStr = numMap[index] || (index + 1).toString();
-                    const isLit = city.status === 'lit';
-                    const isInProgress = city.status === 'in-progress';
-                    const isLocked = false;
+                    
+                    if (cityId) {
+                      const city = CITIES.find(c => c.id === cityId);
+                      if (!city) return null;
+                      
+                      const isLit = city.status === 'lit';
+                      const isInProgress = city.status === 'in-progress';
+                      const isLocked = false;
 
-                    return (
-                      <div key={city.id} className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group ${!isLocked ? 'is-active' : ''}`}>
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${isLit ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : isInProgress ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs relative`}>
-                          {String(index + 1).padStart(2, '0')}
+                      return (
+                        <div key={city.id} className={`relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group ${!isLocked ? 'is-active' : ''}`}>
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] ${isLit ? 'bg-[#2ecc71] text-slate-100 shadow-[0_0_15px_rgba(46,204,113,0.5)]' : isInProgress ? 'bg-cyan-500 text-slate-100 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400'} shrink-0 z-10 font-bold text-xs relative`}>
+                            {String(index + 1).padStart(2, '0')}
+                          </div>
+                          <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${isLit ? 'border-[#2ecc71]/30' : isInProgress ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${isLocked ? 'opacity-60' : ''}`}>
+                             <div className="flex items-center justify-between mb-1">
+                                <h3 className={`${isLit ? 'text-[#2ecc71]' : isInProgress ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第{numStr}城：{city.name}</h3>
+                                {isLocked && <Lock size={14} className="text-slate-500" />}
+                             </div>
+                             <p className="text-xs text-slate-400 mb-3 font-mono">{city.continent} · {city.englishName}</p>
+                             <p className={`text-[11px] leading-relaxed mb-3 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`}>
+                               {city.description}
+                             </p>
+                             {isLit ? (
+                                <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono w-fit">
+                                   <CheckCircle2 size={12} className="mr-1" />
+                                   已完成: 城市卡片已解锁
+                                </div>
+                             ) : isInProgress ? (
+                                <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono w-fit">
+                                   <Activity size={12} className="mr-1" />
+                                   进行中: 唤醒进度 {city.completed}/{city.routes}
+                                </div>
+                             ) : null}
+                          </div>
                         </div>
-                        <div className={`w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border ${isLit ? 'border-[#2ecc71]/30' : isInProgress ? 'border-cyan-500/30' : 'border-white/5'} rounded-2xl p-4 shadow-lg backdrop-blur-sm ${isLocked ? 'opacity-60' : ''}`}>
-                           <div className="flex items-center justify-between mb-1">
-                              <h3 className={`${isLit ? 'text-[#2ecc71]' : isInProgress ? 'text-cyan-400' : 'text-slate-300'} font-bold`}>第{numStr}城：{city.name}</h3>
-                              {isLocked && <Lock size={14} className="text-slate-500" />}
-                           </div>
-                           <p className="text-xs text-slate-400 mb-3 font-mono">{city.continent} · {city.englishName}</p>
-                           <p className={`text-[11px] leading-relaxed mb-3 ${isLocked ? 'text-slate-500' : 'text-slate-300'}`}>
-                             {city.description}
-                           </p>
-                           {isLit ? (
-                              <div className="flex items-center text-[10px] text-[#2ecc71] bg-[#2ecc71]/10 rounded px-2 py-1 font-mono w-fit">
-                                 <CheckCircle2 size={12} className="mr-1" />
-                                 已完成: 城市卡片已解锁
-                              </div>
-                           ) : isInProgress ? (
-                              <div className="flex items-center text-[10px] text-cyan-400 bg-cyan-950/40 rounded px-2 py-1 font-mono w-fit">
-                                 <Activity size={12} className="mr-1" />
-                                 进行中: 唤醒进度 {city.completed}/{city.routes}
-                              </div>
-                           ) : null}
+                      );
+                    } else {
+                      return (
+                        <div key={`locked-${index}`} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group opacity-50">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full border-4 border-[#05070A] bg-slate-800 text-slate-500 shrink-0 z-10 font-bold text-xs relative">
+                            {String(index + 1).padStart(2, '0')}
+                          </div>
+                          <div className="w-[calc(100%-3rem)] md:w-[calc(50%-2rem)] bg-white/5 border border-white/5 rounded-2xl p-4 backdrop-blur-sm">
+                             <div className="flex items-center justify-between mb-1">
+                                <h3 className="text-slate-500 font-bold">第{numStr}城：待解密</h3>
+                                <Lock size={14} className="text-slate-600" />
+                             </div>
+                             <p className="text-xs text-slate-600 mb-3 font-mono">未知坐标</p>
+                             <p className="text-[11px] text-slate-600 leading-relaxed mb-3">
+                               需完成前置任务后，方可获取此地标的脉冲信号。
+                             </p>
+                          </div>
                         </div>
-                      </div>
-                    );
+                      );
+                    }
                   })}
                 </div>
               )}
@@ -694,8 +732,16 @@ export default function HomeTab({ onNavigate, completedChapters = [], targetFlig
               ))}
             </div>
             
+            <button 
+              onClick={handleShuffleCities}
+              className="mt-8 flex items-center justify-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors bg-cyan-500/10 px-6 py-2.5 rounded-full"
+            >
+              <RefreshCw size={16} />
+              <span className="text-sm font-medium">换一批</span>
+            </button>
+            
             <button
-              className="mt-8 text-slate-400 text-sm hover:text-white"
+              className="mt-6 text-slate-400 text-sm hover:text-white"
               onClick={() => setShowCitySelection(false)}
             >
               取消

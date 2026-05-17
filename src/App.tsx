@@ -23,6 +23,7 @@ export default function App() {
       if (c.status !== 'upcoming') c.status = 'unlit';
       c.completed = 0;
       c.completedRouteIndices = [];
+      c.completedRouteTimestamps = {};
       c.justLit = false;
     });
     return [];
@@ -190,19 +191,24 @@ export default function App() {
                    }));
 
                    const { previousCityData, routeIndex } = fullScreenPage.data;
-                   const currentCompleted = previousCityData.completedRouteIndices || [];
+                   const realCityData = CITIES.find(c => c.id === previousCityData.id) || previousCityData;
+                   const currentCompleted = realCityData.completedRouteIndices || [];
                    
                    if (!currentCompleted.includes(routeIndex)) {
-                     previousCityData.completedRouteIndices = [...currentCompleted, routeIndex];
-                     previousCityData.completed = Math.min(previousCityData.completedRouteIndices.length, previousCityData.routes);
+                     realCityData.completedRouteIndices = [...currentCompleted, routeIndex];
+                     if (!realCityData.completedRouteTimestamps) {
+                       realCityData.completedRouteTimestamps = {};
+                     }
+                     realCityData.completedRouteTimestamps[routeIndex] = Date.now();
+                     realCityData.completed = Math.min(realCityData.completedRouteIndices.length, realCityData.routes);
                      
                      // If this is a newly completed route, increment completedRoutes counter
                      setUserStats(prev => ({ ...prev, completedRoutes: prev.completedRoutes + 1 }));
                    }
                    
-                   if (previousCityData.completed === previousCityData.routes && previousCityData.status !== 'lit') {
-                     previousCityData.status = 'lit';
-                     previousCityData.justLit = true;
+                   if (realCityData.completed === realCityData.routes && realCityData.status !== 'lit') {
+                     realCityData.status = 'lit';
+                     realCityData.justLit = true;
                      // Increment completed cities counter
                      setUserStats(prev => ({ ...prev, completedCities: prev.completedCities + 1 }));
                    }
@@ -212,7 +218,7 @@ export default function App() {
                      // Chapter 1: Complete 1 route
                      if (!newChapters.includes(1)) newChapters.push(1);
                      // Chapter 2: Complete 1 city
-                     if (previousCityData.status === 'lit' && !newChapters.includes(2)) {
+                     if (realCityData.status === 'lit' && !newChapters.includes(2)) {
                        newChapters.push(2);
                      }
                      
@@ -228,7 +234,7 @@ export default function App() {
                    });
 
                    // Navigate back to cityRoutes with the updated data
-                   setFullScreenPage({ type: 'cityRoutes', data: { ...previousCityData } });
+                   setFullScreenPage({ type: 'cityRoutes', data: realCityData });
                  }}
                />
             )}

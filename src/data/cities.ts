@@ -14,6 +14,7 @@ export interface CityData {
   completed: number;
   status: CityStatus;
   completedRouteIndices?: number[];
+  completedRouteTimestamps?: Record<number, number>;
   justLit?: boolean;
   labelPosition?: LabelPosition;
   description?: string;
